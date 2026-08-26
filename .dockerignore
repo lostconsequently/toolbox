@@ -1,0 +1,29 @@
+node_modules
+**/node_modules
+
+# Live data belongs in the named volumes. Without this, COPY backend/ would
+# bake a developer's toolbox.db into the image.
+backend/database/*.db
+backend/database/*.db-journal
+backend/database/backups
+backend/temp
+backend/logs
+
+# Produced by the frontend-build stage; a stale local copy would overwrite it.
+frontend/dist
+backend/public
+
+.env
+.env.*
+**/.env
+**/.env.*
+
+.git
+.github
+.claude
+docker
+temp
+*.log
+npm-debug.log*
+README.md
+**/README.md

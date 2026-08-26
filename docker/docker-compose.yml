@@ -1,0 +1,58 @@
+services:
+  toolbox:
+    build:
+      context: ..
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: toolbox
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      PORT: 3001
+      DB_PATH: /data/db/toolbox.db
+      BACKUP_DIR: /data/backups
+      TEMP_DIR: /data/temp
+      LOG_DIR: /data/logs
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env (copy .env.example)}
+      # Only for extra origins that must reach the API cross-origin.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      # Set to 1 when a reverse proxy sits in front, so the rate limiter sees
+      # the real client IP.
+      TRUST_PROXY: ${TRUST_PROXY:-}
+    volumes:
+      - toolbox_db:/data/db
+      - toolbox_backups:/data/backups
+      - toolbox_temp:/data/temp
+      - toolbox_logs:/data/logs
+    # Ping Tool / Traceroute shell out to the OS ping/traceroute binaries,
+    # which need raw sockets.
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    ports:
+      - "${TOOLBOX_PORT:-8080}:3001"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  toolbox_db:
+  toolbox_backups:
+  toolbox_temp:
+  toolbox_logs:

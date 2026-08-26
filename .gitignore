@@ -1,0 +1,83 @@
+# Dependencies — anywhere in the tree, not just the two known locations.
+# node_modules was committed once before (2,235 paths); this makes a repeat
+# impossible regardless of where a future package.json lives.
+node_modules/
+
+# Build output
+dist/
+frontend/dist/
+frontend/dist-ssr/
+backend/dist/
+# The Vite build the backend serves in production. Created inside the Docker
+# image; only present locally when testing the production layout by hand.
+backend/public/
+
+# Databases and their journals — any depth.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Backups, temp and audit output
+backups/
+temp/
+logs/
+backend/backups/
+backend/temp/
+backend/logs/
+
+# Admin-uploaded branding assets (logo/favicon/login background) - runtime
+# data, not source.
+backend/database/uploads/
+
+# Environment files at any depth, but keep the committed templates.
+# The negation must come after the ignore patterns or it has no effect.
+.env
+**/.env
+**/.env.*
+!**/.env.example
+
+# Keys, certificates and key stores. The Certificate Toolkit works with these
+# formats, so a test file is easy to leave lying around by accident.
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.pfx
+*.p12
+*.p7b
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local config
+*.local
+
+# Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Claude Code
+CLAUDE.md
+.claude

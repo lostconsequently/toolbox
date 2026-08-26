@@ -1,0 +1,84 @@
+name: Build and publish Docker image
+
+# Publishes the single Toolbox image (React build served by the Express
+# backend) to GitHub Container Registry (ghcr.io) so it can be pulled straight
+# into Portainer/Synology without building on the NAS. Uses the built-in
+# GITHUB_TOKEN — no extra secrets needed to push.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix frontend
+      - run: npm run lint --prefix frontend
+
+  image:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/toolbox
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - uses: docker/build-push-action@v6
+        with:
+          # Repository root: the image builds the frontend and the backend.
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          # Same-origin default: the backend serves the build, so a relative
+          # path works regardless of which host/NAS it ends up on.
+          build-args: |
+            VITE_API_URL=/api
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=toolbox
+          cache-to: type=gha,mode=max,scope=toolbox
+
+  # Only runs for an actual version tag push (v1.2.3, not a plain push to
+  # main) - creates the GitHub Release page with auto-generated notes
+  # (commits/PRs since the previous tag), same convention most public
+  # Docker-shipping projects use so "what's new" is visible without digging
+  # through commit history.
+  release:
+    needs: image
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
