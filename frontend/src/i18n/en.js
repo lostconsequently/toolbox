@@ -120,6 +120,8 @@ export default {
     deleteConfirmMessage:
       "This will also delete all subcategories and tools within this category. Continue?",
     deleteConfirmTitle: "Delete category",
+    saveError: "Could not save the category. Please try again.",
+    deleteError: "Could not delete the category. Please try again.",
   },
 
   subcategoriesPage: {
@@ -135,6 +137,9 @@ export default {
     showToolsAria: "Show tools in {name}",
     deleteConfirmMessage: "Delete this subcategory?",
     deleteConfirmTitle: "Delete subcategory",
+    categoryRequired: "Select a category first.",
+    saveError: "Could not save the subcategory. Please try again.",
+    deleteError: "Could not delete the subcategory. Please try again.",
   },
 
   toolsPage: {
@@ -205,12 +210,13 @@ export default {
     uninstallConfirmMessage:
       "Uninstall {name}? This removes it from the Tools page for all users.",
     moreActions: "More actions for {name}",
-    versionLabel: "v{version}",
     statActive: "Active",
     statTemplates: "Templates",
     statInactive: "Inactive",
     readOnlyNotice:
       "You're viewing Tools Center in read-only mode. Log in as an administrator to install, configure, or manage tools.",
+    installError: "Could not install {name}. Please try again.",
+    configureError: "Could not save changes to {name}. Please try again.",
     bulkSelectItem: "Select {name}",
     bulkSelectAllVisible: "Select all shown",
     bulkSelectedCount: "{count} selected",
@@ -998,5 +1004,85 @@ export default {
     statusError: "Something went wrong comparing these inputs.",
     largeInputWarning:
       "Input is large - automatic comparison is paused. Click Compare to run it.",
+  },
+
+  setupWizard: {
+    stepWelcome: "Welcome",
+    stepMethod: "Installation method",
+    stepSettings: "Basic settings",
+    stepSummary: "Summary",
+    stepConfigure: "Configuring",
+    stepDone: "Done",
+
+    welcomeTitle: "Welcome to Toolbox",
+    welcomeDescription:
+      "Let's get your instance set up. This will only take a minute.",
+    welcomeVersion: "Version {version}",
+    getStarted: "Get started",
+
+    methodTitle: "Choose an installation method",
+    methodDescription:
+      "You can start with a clean environment, or restore everything from a previous Toolbox backup.",
+    methodFreshTitle: "New environment",
+    methodFreshDescription:
+      "Set up a brand-new, empty installation with default settings.",
+    methodRestoreTitle: "Restore from backup",
+    methodRestoreDescription:
+      "Upload a Toolbox backup file to restore its database and configuration.",
+    restoreUploadLabel: "Backup file (.db)",
+    restoreValidating: "Validating backup file...",
+    restoreValid: "Backup file looks good.",
+    restoreInvalid: "This file could not be validated.",
+    restoreSize: "Size",
+    restoreModified: "Last modified",
+    restoreVersion: "Version",
+    restoreVersionUnavailable: "Not available",
+    restoreChooseAnother: "Choose a different file",
+
+    seedTitle: "Starter content",
+    seedEmptyTitle: "Start empty",
+    seedEmptyDescription: "No categories or tools - build your own from scratch.",
+    seedCategoriesTitle: "Categories & subcategories",
+    seedCategoriesDescription:
+      "Pre-fill a ready-made set of categories, subcategories and colors.",
+    seedCategoriesAndToolsTitle: "Categories, subcategories & key tools",
+    seedCategoriesAndToolsDescription:
+      "Same as above, plus one of the most useful tools pre-installed in each subcategory.",
+
+    settingsTitle: "Basic settings",
+    settingsDescription:
+      "These can always be changed later from Admin Center or your own Settings page.",
+    languageLabel: "Language",
+    timezoneLabel: "Timezone",
+    timezonePreview: "Current time there: {time}",
+    themeLabel: "Theme",
+
+    summaryTitle: "Review your choices",
+    summaryDescription: "Everything looks right? Let's apply it.",
+    summaryMethod: "Installation method",
+    summaryMethodFresh: "New environment",
+    summaryMethodRestore: "Restore from backup",
+    summaryStarterContent: "Starter content",
+    summaryLanguage: "Language",
+    summaryTimezone: "Timezone",
+    summaryTheme: "Theme",
+    summaryBackupFile: "Backup file",
+
+    configureTitle: "Setting up Toolbox",
+    configureStepDatabase: "Preparing the database...",
+    configureStepConfig: "Saving configuration...",
+    configureStepIntegrity: "Running integrity check...",
+    configureStepFinishing: "Finishing up...",
+    configureFailed: "Setup could not be completed.",
+    tryAgain: "Try again",
+
+    doneTitle: "Toolbox is ready",
+    doneDescription: "Setup completed successfully.",
+    startToolbox: "Start Toolbox",
+
+    back: "Back",
+    next: "Next",
+
+    errorGeneric: "Something went wrong. Please try again.",
   },
 };

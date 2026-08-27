@@ -143,16 +143,6 @@ export default function TemplateCatalogCard({
               />
             )}
           </div>
-
-          <div
-            style={{
-              marginTop: "3px",
-              fontSize: "11px",
-              color: "var(--subtle)",
-            }}
-          >
-            {t("toolsCenter.versionLabel", { version: definition.version })}
-          </div>
         </div>
 
         {isInstalled ? (

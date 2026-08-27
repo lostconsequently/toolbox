@@ -84,6 +84,14 @@ CREATE INDEX IF NOT EXISTS idx_scripts_subcategory_id ON scripts(subcategory_id)
 CREATE INDEX IF NOT EXISTS idx_scripts_is_admin_only ON scripts(is_admin_only);
 CREATE INDEX IF NOT EXISTS idx_script_fields_script_id ON script_fields(script_id);
 
+-- A fresh database has no categories, which leaves installTemplate() in
+-- ToolsCenter.jsx with nothing to assign a new tool to. Seed one default
+-- category, but only when the table is completely empty so this doesn't
+-- resurrect it after an admin deletes all categories on purpose.
+INSERT INTO categories (name, color, icon, sort_order)
+SELECT 'General', '#2563eb', 'category', 0
+WHERE NOT EXISTS (SELECT 1 FROM categories);
+
 -- Optional authentication (disabled by default - see backend/services/authService.js).
 -- One row per person who can log in. The pre-existing single shared admin
 -- password becomes the first row here (source='local') via a one-time
@@ -212,6 +220,24 @@ CREATE TABLE IF NOT EXISTS backup_config (
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO backup_config (id) VALUES (1);
+
+-- Single-row config table (id is always 1) tracking the First Startup
+-- Wizard. `completed` gates whether the wizard shows on boot - it is
+-- intentionally independent of auth_config/ADMIN_PASSWORD, since the wizard
+-- never touches the admin credential (that stays fully .env-managed). The
+-- chosen language/timezone/theme values are recorded here for the wizard's
+-- own summary/audit purposes; nothing else in the app reads timezone today
+-- (see routes/setup.js).
+CREATE TABLE IF NOT EXISTS setup_status (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  completed INTEGER NOT NULL DEFAULT 0,
+  completed_at TEXT,
+  language TEXT,
+  timezone TEXT,
+  theme TEXT,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+INSERT OR IGNORE INTO setup_status (id, completed) VALUES (1, 0);
 
 -- Structured application/system/error event log, powering the Admin Center
 -- Logging tab. Append-only - rows are only ever deleted by the retention

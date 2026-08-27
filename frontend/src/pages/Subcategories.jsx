@@ -7,6 +7,7 @@ import { useAdmin } from "../context/AdminContext";
 import { useSettings } from "../context/SettingsContext";
 import ActionButton from "../components/toolForms/shared/ActionButton";
 import ActionRow from "../components/toolForms/shared/ActionRow";
+import StatusMessage from "../components/toolForms/shared/StatusMessage";
 import ViewModeToggle from "../components/shared/ViewModeToggle";
 import Header from "../components/Header";
 import { useConfirm } from "../hooks/useConfirm";
@@ -49,11 +50,17 @@ export default function Subcategories() {
   const [categoryId, setCategoryId] = useState("");
 
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
+  const [error, setError] = useState("");
 
   const createSubcategory = async () => {
-    if (!name.trim() || !categoryId) {
+    if (!name.trim()) return;
+
+    if (!categoryId) {
+      setError(t("subcategoriesPage.categoryRequired"));
       return;
     }
+
+    setError("");
 
     try {
       await addSubcategory({
@@ -66,13 +73,19 @@ export default function Subcategories() {
       setCategoryId("");
     } catch (err) {
       console.error(err);
+      setError(t("subcategoriesPage.saveError"));
     }
   };
 
   const saveSubcategory = async () => {
-    if (!editingSubcategoryId || !name.trim() || !categoryId) {
+    if (!editingSubcategoryId || !name.trim()) return;
+
+    if (!categoryId) {
+      setError(t("subcategoriesPage.categoryRequired"));
       return;
     }
+
+    setError("");
 
     try {
       await updateSubcategory(editingSubcategoryId, {
@@ -86,6 +99,7 @@ export default function Subcategories() {
       setEditingSubcategoryId(null);
     } catch (err) {
       console.error(err);
+      setError(t("subcategoriesPage.saveError"));
     }
   };
 
@@ -108,10 +122,13 @@ export default function Subcategories() {
 
     if (!confirmed) return;
 
+    setError("");
+
     try {
       await deleteSubcategory(id);
     } catch (err) {
       console.error(err);
+      setError(t("subcategoriesPage.deleteError"));
     }
   };
 
@@ -136,6 +153,12 @@ export default function Subcategories() {
           }}
         >
           <h2>{t("subcategoriesPage.newHeading")}</h2>
+
+          {error && (
+            <div style={{ marginBottom: "10px" }}>
+              <StatusMessage status="error">{error}</StatusMessage>
+            </div>
+          )}
 
           <input
             placeholder={t("subcategoriesPage.namePlaceholder")}

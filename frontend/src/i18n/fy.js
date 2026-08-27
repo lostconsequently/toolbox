@@ -120,6 +120,8 @@ export default {
     deleteConfirmMessage:
       "Dit wisket ek alle subkategoryen en ark binnen dizze kategory. Trochgean?",
     deleteConfirmTitle: "Kategory wiskje",
+    saveError: "Bewarjen fan de kategory is mislearre. Besykje it opnij.",
+    deleteError: "Wiskjen fan de kategory is mislearre. Besykje it opnij.",
   },
 
   subcategoriesPage: {
@@ -135,6 +137,10 @@ export default {
     showToolsAria: "Toan ark yn {name}",
     deleteConfirmMessage: "Dizze subkategory wiskje?",
     deleteConfirmTitle: "Subkategory wiskje",
+    categoryRequired: "Selektearje earst in kategory.",
+    saveError: "Bewarjen fan de subkategory is mislearre. Besykje it opnij.",
+    deleteError:
+      "Wiskjen fan de subkategory is mislearre. Besykje it opnij.",
   },
 
   toolsPage: {
@@ -205,12 +211,14 @@ export default {
     uninstallConfirmMessage:
       "{name} fuortsmite? Dit fuortsmyt it ark foar alle brûkers fan de Ark-side.",
     moreActions: "Mear aksjes foar {name}",
-    versionLabel: "v{version}",
     statActive: "Aktyf",
     statTemplates: "Templates",
     statInactive: "Net aktyf",
     readOnlyNotice:
       "Jo besjogge it Ark Sintrum yn allinnich-lêze modus. Log yn as behearder om ark te ynstallearjen, konfigurearjen of beheare.",
+    installError: "Ynstallearjen fan {name} is mislearre. Besykje it opnij.",
+    configureError:
+      "Wizigingen oan {name} koenen net bewarre wurde. Besykje it opnij.",
     bulkSelectItem: "{name} selektearje",
     bulkSelectAllVisible: "Alles selektearje",
     bulkSelectedCount: "{count} selektearre",
@@ -952,5 +960,85 @@ export default {
       "Der gie wat mis by it toanen fan dit finster. Dyn oare iepene finsters binne net beynfloede.",
     retry: "Opnij probearje",
     close: "Finster slute",
+  },
+
+  setupWizard: {
+    stepWelcome: "Wolkom",
+    stepMethod: "Ynstallaasjemetoade",
+    stepSettings: "Basisynstellingen",
+    stepSummary: "Gearfetting",
+    stepConfigure: "Konfigurearje",
+    stepDone: "Klear",
+
+    welcomeTitle: "Wolkom by Toolbox",
+    welcomeDescription:
+      "Litte wy dyn ynstallaasje ynstelle. Dit duorret mar in minútsje.",
+    welcomeVersion: "Ferzje {version}",
+    getStarted: "Oan de slach",
+
+    methodTitle: "Kies in ynstallaasjemetoade",
+    methodDescription:
+      "Do kinst starte mei in lege omjouwing, of alles werombringe út in eardere Toolbox-reservekopy.",
+    methodFreshTitle: "Nije omjouwing",
+    methodFreshDescription:
+      "Set in gloednije, lege ynstallaasje op mei standertynstellingen.",
+    methodRestoreTitle: "Weromsette út reservekopy",
+    methodRestoreDescription:
+      "Laad in Toolbox-reservekopybestân op om de database en konfiguraasje werom te setten.",
+    restoreUploadLabel: "Reservekopybestân (.db)",
+    restoreValidating: "Reservekopybestân falidearje...",
+    restoreValid: "It reservekopybestân sjocht der goed út.",
+    restoreInvalid: "Dit bestân koe net falidearre wurde.",
+    restoreSize: "Grutte",
+    restoreModified: "Lêst wizige",
+    restoreVersion: "Ferzje",
+    restoreVersionUnavailable: "Net beskikber",
+    restoreChooseAnother: "Kies in oar bestân",
+
+    seedTitle: "Startynhâld",
+    seedEmptyTitle: "Leech begjinne",
+    seedEmptyDescription: "Gjin kategoryen of ark - bou alles sels op.",
+    seedCategoriesTitle: "Kategoryen & subkategoryen",
+    seedCategoriesDescription:
+      "Foarfolje alfêst in kant-en-klaar set kategoryen, subkategoryen en kleuren.",
+    seedCategoriesAndToolsTitle: "Kategoryen, subkategoryen & wichtichste ark",
+    seedCategoriesAndToolsDescription:
+      "Lykas hjirboppe, plus ien fan de handichste arkstikken alfêst ynstallearre per subkategory.",
+
+    settingsTitle: "Basisynstellingen",
+    settingsDescription:
+      "Do kinst dit letter altyd wizigje fia it Behearsintrum of dyn eigen Ynstellingen-side.",
+    languageLabel: "Taal",
+    timezoneLabel: "Tiidsône",
+    timezonePreview: "Aktuele tiid dêr: {time}",
+    themeLabel: "Tema",
+
+    summaryTitle: "Kontrolearje dyn karren",
+    summaryDescription: "Klopt alles? Dan geane wy it tapasse.",
+    summaryMethod: "Ynstallaasjemetoade",
+    summaryMethodFresh: "Nije omjouwing",
+    summaryMethodRestore: "Weromsette út reservekopy",
+    summaryStarterContent: "Startynhâld",
+    summaryLanguage: "Taal",
+    summaryTimezone: "Tiidsône",
+    summaryTheme: "Tema",
+    summaryBackupFile: "Reservekopybestân",
+
+    configureTitle: "Toolbox wurdt ynsteld",
+    configureStepDatabase: "Database tariede...",
+    configureStepConfig: "Konfiguraasje bewarje...",
+    configureStepIntegrity: "Yntegriteitskontrôle útfiere...",
+    configureStepFinishing: "Ofrûnje...",
+    configureFailed: "Setup koe net ôfrûne wurde.",
+    tryAgain: "Opnij probearje",
+
+    doneTitle: "Toolbox is klear",
+    doneDescription: "Setup mei sukses ôfrûn.",
+    startToolbox: "Toolbox starte",
+
+    back: "Werom",
+    next: "Folgjende",
+
+    errorGeneric: "Der gie wat mis. Probearje it opnij.",
   },
 };

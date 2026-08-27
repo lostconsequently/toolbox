@@ -121,6 +121,9 @@ export default {
     deleteConfirmMessage:
       "Dit verwijdert ook alle subcategorieën en tools binnen deze categorie. Doorgaan?",
     deleteConfirmTitle: "Categorie verwijderen",
+    saveError: "Opslaan van de categorie is mislukt. Probeer het opnieuw.",
+    deleteError:
+      "Verwijderen van de categorie is mislukt. Probeer het opnieuw.",
   },
 
   subcategoriesPage: {
@@ -136,6 +139,10 @@ export default {
     showToolsAria: "Toon tools in {name}",
     deleteConfirmMessage: "Deze subcategorie verwijderen?",
     deleteConfirmTitle: "Subcategorie verwijderen",
+    categoryRequired: "Selecteer eerst een categorie.",
+    saveError: "Opslaan van de subcategorie is mislukt. Probeer het opnieuw.",
+    deleteError:
+      "Verwijderen van de subcategorie is mislukt. Probeer het opnieuw.",
   },
 
   toolsPage: {
@@ -206,12 +213,14 @@ export default {
     uninstallConfirmMessage:
       "{name} verwijderen? Dit verwijdert de tool voor alle gebruikers van de Tools-pagina.",
     moreActions: "Meer acties voor {name}",
-    versionLabel: "v{version}",
     statActive: "Actief",
     statTemplates: "Templates",
     statInactive: "Inactief",
     readOnlyNotice:
       "Je bekijkt Tools Center in alleen-lezen modus. Log in als beheerder om tools te installeren, configureren of beheren.",
+    installError: "Installeren van {name} is mislukt. Probeer het opnieuw.",
+    configureError:
+      "Wijzigingen aan {name} konden niet worden opgeslagen. Probeer het opnieuw.",
     bulkSelectItem: "{name} selecteren",
     bulkSelectAllVisible: "Alles selecteren",
     bulkSelectedCount: "{count} geselecteerd",
@@ -1010,5 +1019,85 @@ export default {
     statusError: "Er ging iets mis bij het vergelijken van deze invoer.",
     largeInputWarning:
       "De invoer is groot - automatisch vergelijken is gepauzeerd. Klik op Vergelijken om het uit te voeren.",
+  },
+
+  setupWizard: {
+    stepWelcome: "Welkom",
+    stepMethod: "Installatiemethode",
+    stepSettings: "Basisinstellingen",
+    stepSummary: "Samenvatting",
+    stepConfigure: "Configureren",
+    stepDone: "Gereed",
+
+    welcomeTitle: "Welkom bij Toolbox",
+    welcomeDescription:
+      "Laten we je installatie instellen. Dit duurt maar een minuutje.",
+    welcomeVersion: "Versie {version}",
+    getStarted: "Aan de slag",
+
+    methodTitle: "Kies een installatiemethode",
+    methodDescription:
+      "Je kunt starten met een lege omgeving, of alles herstellen vanuit een eerdere Toolbox-back-up.",
+    methodFreshTitle: "Nieuwe omgeving",
+    methodFreshDescription:
+      "Zet een gloednieuwe, lege installatie op met standaardinstellingen.",
+    methodRestoreTitle: "Herstellen vanuit back-up",
+    methodRestoreDescription:
+      "Upload een Toolbox back-upbestand om de database en configuratie te herstellen.",
+    restoreUploadLabel: "Back-upbestand (.db)",
+    restoreValidating: "Back-upbestand valideren...",
+    restoreValid: "Het back-upbestand ziet er goed uit.",
+    restoreInvalid: "Dit bestand kon niet gevalideerd worden.",
+    restoreSize: "Grootte",
+    restoreModified: "Laatst gewijzigd",
+    restoreVersion: "Versie",
+    restoreVersionUnavailable: "Niet beschikbaar",
+    restoreChooseAnother: "Kies een ander bestand",
+
+    seedTitle: "Startinhoud",
+    seedEmptyTitle: "Leeg beginnen",
+    seedEmptyDescription: "Geen categorieën of tools - bouw alles zelf op.",
+    seedCategoriesTitle: "Categorieën & subcategorieën",
+    seedCategoriesDescription:
+      "Vul alvast een kant-en-klare set categorieën, subcategorieën en kleuren in.",
+    seedCategoriesAndToolsTitle: "Categorieën, subcategorieën & belangrijkste tools",
+    seedCategoriesAndToolsDescription:
+      "Zoals hierboven, plus één van de handigste tools alvast geïnstalleerd per subcategorie.",
+
+    settingsTitle: "Basisinstellingen",
+    settingsDescription:
+      "Je kunt dit later altijd wijzigen via Admin Center of je eigen Instellingen-pagina.",
+    languageLabel: "Taal",
+    timezoneLabel: "Tijdzone",
+    timezonePreview: "Actuele tijd daar: {time}",
+    themeLabel: "Thema",
+
+    summaryTitle: "Controleer je keuzes",
+    summaryDescription: "Klopt alles? Dan gaan we het toepassen.",
+    summaryMethod: "Installatiemethode",
+    summaryMethodFresh: "Nieuwe omgeving",
+    summaryMethodRestore: "Herstellen vanuit back-up",
+    summaryStarterContent: "Startinhoud",
+    summaryLanguage: "Taal",
+    summaryTimezone: "Tijdzone",
+    summaryTheme: "Thema",
+    summaryBackupFile: "Back-upbestand",
+
+    configureTitle: "Toolbox wordt ingesteld",
+    configureStepDatabase: "Database voorbereiden...",
+    configureStepConfig: "Configuratie opslaan...",
+    configureStepIntegrity: "Integriteitscontrole uitvoeren...",
+    configureStepFinishing: "Afronden...",
+    configureFailed: "Setup kon niet worden afgerond.",
+    tryAgain: "Opnieuw proberen",
+
+    doneTitle: "Toolbox is klaar",
+    doneDescription: "Setup succesvol afgerond.",
+    startToolbox: "Toolbox starten",
+
+    back: "Terug",
+    next: "Volgende",
+
+    errorGeneric: "Er ging iets mis. Probeer het opnieuw.",
   },
 };

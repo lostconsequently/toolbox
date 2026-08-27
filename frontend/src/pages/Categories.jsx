@@ -8,6 +8,7 @@ import { useAdmin } from "../context/AdminContext";
 import { useSettings } from "../context/SettingsContext";
 import ActionButton from "../components/toolForms/shared/ActionButton";
 import ColorField from "../components/toolForms/shared/ColorField";
+import StatusMessage from "../components/toolForms/shared/StatusMessage";
 import ViewModeToggle from "../components/shared/ViewModeToggle";
 import Header from "../components/Header";
 import { useConfirm } from "../hooks/useConfirm";
@@ -51,6 +52,7 @@ export default function Categories() {
   const [color, setColor] = useState("#2563eb");
 
   const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [error, setError] = useState("");
 
   const resetForm = () => {
     setName("");
@@ -60,6 +62,8 @@ export default function Categories() {
 
   const createCategory = async () => {
     if (!name.trim()) return;
+
+    setError("");
 
     try {
       await addCategory({
@@ -71,6 +75,7 @@ export default function Categories() {
       resetForm();
     } catch (err) {
       console.error(err);
+      setError(t("categoriesPage.saveError"));
     }
   };
 
@@ -78,6 +83,8 @@ export default function Categories() {
     if (!name.trim() || !editingCategoryId) {
       return;
     }
+
+    setError("");
 
     try {
       await updateCategory(editingCategoryId, {
@@ -89,6 +96,7 @@ export default function Categories() {
       resetForm();
     } catch (err) {
       console.error(err);
+      setError(t("categoriesPage.saveError"));
     }
   };
 
@@ -106,6 +114,8 @@ export default function Categories() {
 
     if (!confirmed) return;
 
+    setError("");
+
     try {
       await deleteCategory(id);
 
@@ -114,6 +124,7 @@ export default function Categories() {
       }
     } catch (err) {
       console.error(err);
+      setError(t("categoriesPage.deleteError"));
     }
   };
 
@@ -145,6 +156,12 @@ export default function Categories() {
               ? t("categoriesPage.editHeading")
               : t("categoriesPage.newHeading")}
           </h2>
+
+          {error && (
+            <div style={{ marginBottom: "14px" }}>
+              <StatusMessage status="error">{error}</StatusMessage>
+            </div>
+          )}
 
           <div
             style={{ display: "flex", flexDirection: "column", gap: "14px" }}

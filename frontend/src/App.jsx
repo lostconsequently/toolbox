@@ -11,12 +11,14 @@ import AdminCenter from "./pages/AdminCenter";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Recover from "./pages/Recover";
+import SetupWizard from "./pages/SetupWizard";
 
 import { themes } from "./core/themes";
 
 import { useTheme } from "./context/ThemeContext";
 import { useBranding } from "./context/BrandingContext";
 import { useSettings } from "./context/SettingsContext";
+import { useSetupStatus } from "./hooks/useSetupStatus";
 
 import MainLayout from "./layouts/MainLayout";
 import CommandPalette from "./components/CommandPalette";
@@ -25,11 +27,15 @@ import MatrixRain from "./components/MatrixRain";
 import WinXpBackground from "./components/WinXpBackground";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RequireAdminRole from "./components/RequireAdminRole";
+import RequireSetupComplete from "./components/RequireSetupComplete";
+import RedirectIfSetupComplete from "./components/RedirectIfSetupComplete";
 
 function App() {
   const { theme } = useTheme();
   const { settings } = useSettings();
   const { appName, faviconUrl, primaryColor, accentColor } = useBranding();
+  const { completed: setupCompleted, loading: setupLoading } =
+    useSetupStatus();
 
   const currentTheme = themes[theme];
 
@@ -95,16 +101,52 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/setup"
+            element={
+              <RedirectIfSetupComplete
+                completed={setupCompleted}
+                loading={setupLoading}
+              >
+                <SetupWizard />
+              </RedirectIfSetupComplete>
+            }
+          />
 
-          <Route path="/recover" element={<Recover />} />
+          <Route
+            path="/login"
+            element={
+              <RequireSetupComplete
+                completed={setupCompleted}
+                loading={setupLoading}
+              >
+                <Login />
+              </RequireSetupComplete>
+            }
+          />
+
+          <Route
+            path="/recover"
+            element={
+              <RequireSetupComplete
+                completed={setupCompleted}
+                loading={setupLoading}
+              >
+                <Recover />
+              </RequireSetupComplete>
+            }
+          />
 
           <Route
             path="/*"
             element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Routes>
+              <RequireSetupComplete
+                completed={setupCompleted}
+                loading={setupLoading}
+              >
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Routes>
                     <Route path="/" element={<Dashboard />} />
 
                     <Route
@@ -148,11 +190,12 @@ function App() {
                     />
 
                     <Route path="/settings" element={<Settings />} />
-                  </Routes>
-                </MainLayout>
+                    </Routes>
+                  </MainLayout>
 
-                <CommandPalette />
-              </ProtectedRoute>
+                  <CommandPalette />
+                </ProtectedRoute>
+              </RequireSetupComplete>
             }
           />
         </Routes>

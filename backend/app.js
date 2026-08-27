@@ -37,6 +37,7 @@ const authConfigRoutes = require("./routes/authConfig");
 const entraAuthRoutes = require("./routes/entraAuth");
 const brandingRoutes = require("./routes/branding");
 const { getBrandingUploadsDir } = require("./utils/brandingUploads");
+const setupRoutes = require("./routes/setup");
 const systemInfoRoutes = require("./routes/systemInfo");
 const usersRoutes = require("./routes/users");
 const logsRoutes = require("./routes/logs");
@@ -224,7 +225,7 @@ app.get("/api", (req, res) => {
   res.json({
     app: "Toolbox API",
     status: "running",
-    version: "0.9.5",
+    version: "0.9.6",
   });
 });
 
@@ -253,7 +254,11 @@ app.use("/api", requireAuth);
 // touch the database, and the backup routes themselves manage the lock and
 // need to stay reachable for prepare/commit/cancel to complete.
 app.use("/api", (req, res, next) => {
-  if (req.path.startsWith("/auth") || req.path.startsWith("/backup")) {
+  if (
+    req.path.startsWith("/auth") ||
+    req.path.startsWith("/backup") ||
+    req.path.startsWith("/setup")
+  ) {
     return next();
   }
 
@@ -290,6 +295,12 @@ app.use("/api/admin/auth-config", requireAdmin, authConfigRoutes);
 // itself. Also listed in requireAuth's PUBLIC_PATH_PREFIXES so Layer 1 never
 // blocks it either.
 app.use("/api/branding", brandingRoutes);
+
+// First Startup Wizard - public for the same reason as /branding above (it
+// has to be reachable before any admin credential/session exists). Its own
+// requireSetupIncomplete guard (routes/setup.js) closes the mutating routes
+// permanently once setup is done; /status stays readable always.
+app.use("/api/setup", setupRoutes);
 
 // Admin Center's About tab - read-only, admin-gated the same way as
 // auth-config (no separate write path exists, so no per-route gating needed

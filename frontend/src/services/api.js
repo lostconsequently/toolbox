@@ -629,4 +629,44 @@ export const api = {
 
     return response.blob();
   },
+
+  // Public app info (name, status, version) - the root of the API itself,
+  // used by the wizard's welcome step before anything else is known.
+  getAppInfo: () => request(""),
+
+  // First Startup Wizard - all public, no admin token exists yet at this
+  // point. /setup/status stays reachable after completion too (used by the
+  // route gate); the others 403 permanently once setup is done.
+  getSetupStatus: () => request("/setup/status"),
+
+  prepareSetupRestore: async (file) => {
+    const formData = new FormData();
+
+    formData.append("database", file);
+
+    const response = await fetch(`${API_BASE}/setup/restore/prepare`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Restore validation failed");
+    }
+
+    return result;
+  },
+
+  cancelSetupRestore: (token) =>
+    request("/setup/restore/cancel", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  completeSetup: (data) =>
+    request("/setup/complete", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };

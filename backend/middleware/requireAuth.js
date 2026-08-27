@@ -36,6 +36,7 @@ const PUBLIC_PATH_PREFIXES = [
   "/admin/system-info",
   "/admin/users",
   "/branding",
+  "/setup",
 ];
 
 function isPublicPath(path) {

@@ -76,6 +76,7 @@ export default function ToolsCenter() {
   const [sortMode, setSortMode] = useState("name");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [bulkRunning, setBulkRunning] = useState(false);
+  const [installError, setInstallError] = useState("");
 
   useEffect(() => {
     setSelectedIds((prev) => {
@@ -183,6 +184,8 @@ export default function ToolsCenter() {
 
     const definition = toolRegistry[toolType];
 
+    setInstallError("");
+
     try {
       await addTool({
         name: definition.label,
@@ -205,6 +208,7 @@ export default function ToolsCenter() {
       });
     } catch (err) {
       console.error(err);
+      setInstallError(t("toolsCenter.installError", { name: definition.label }));
     }
   };
 
@@ -362,6 +366,10 @@ export default function ToolsCenter() {
         <StatusMessage status="warning">
           {t("toolsCenter.readOnlyNotice")}
         </StatusMessage>
+      )}
+
+      {installError && (
+        <StatusMessage status="error">{installError}</StatusMessage>
       )}
 
       <div

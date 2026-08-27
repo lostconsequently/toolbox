@@ -959,3 +959,12 @@ router.put("/config", async (req, res, next) => {
 
 module.exports = router;
 module.exports.isDatabaseBusy = isDatabaseBusy;
+
+// Reused by routes/setup.js (the First Startup Wizard's restore-from-backup
+// step) so it doesn't reimplement the same validation/lock/reopen logic.
+module.exports.isSqliteDatabase = isSqliteDatabase;
+module.exports.verifySqliteIntegrity = verifySqliteIntegrity;
+module.exports.tryAcquireDbLock = tryAcquireDbLock;
+module.exports.releaseDbLock = releaseDbLock;
+module.exports.reopenDatabase = reopenDatabase;
+module.exports.getBackupDir = getBackupDir;

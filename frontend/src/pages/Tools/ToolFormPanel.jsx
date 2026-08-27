@@ -4,6 +4,7 @@ import { toolRegistry } from "../../core/toolRegistry";
 import { ICONS, ICON_LABELS } from "../../config/icons";
 import ActionButton from "../../components/toolForms/shared/ActionButton";
 import ActionRow from "../../components/toolForms/shared/ActionRow";
+import StatusMessage from "../../components/toolForms/shared/StatusMessage";
 import { useLanguage } from "../../context/LanguageContext";
 import LinkTemplateFields, {
   DEFAULT_INPUT_TEMPLATE,
@@ -14,6 +15,7 @@ export default function ToolFormPanel({
   categories,
   subcategories,
   compactMode,
+  error,
   onSubmit,
   onCancel,
 }) {
@@ -88,6 +90,14 @@ export default function ToolFormPanel({
 
   return (
     <>
+      {error && (
+        <div style={{ marginBottom: "12px" }}>
+          <StatusMessage status="error" compactMode={compactMode}>
+            {error}
+          </StatusMessage>
+        </div>
+      )}
+
       <div
         style={{
           padding: compactMode ? "10px 12px" : "12px 14px",

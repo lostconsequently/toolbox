@@ -1,6 +1,6 @@
 {
   "name": "toolbox-backend",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Backend API for Toolbox",
   "license": "MIT",
   "main": "app.js",

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import FloatingWindow from "../FloatingWindow";
 import Icon from "../Icon";
 import ToolFormPanel from "../../pages/Tools/ToolFormPanel";
@@ -20,9 +21,13 @@ export default function ConfigureToolWindow({
 
   const compactMode = settings?.compactMode || false;
 
+  const [error, setError] = useState("");
+
   const tool = tools.find((t) => t.id === win.item.id) || win.item;
 
   const handleSubmit = async (formData) => {
+    setError("");
+
     try {
       await updateTool(tool.id, {
         ...formData,
@@ -33,6 +38,7 @@ export default function ConfigureToolWindow({
       onClose();
     } catch (err) {
       console.error(err);
+      setError(t("toolsCenter.configureError", { name: tool.name }));
     }
   };
 
@@ -54,6 +60,7 @@ export default function ConfigureToolWindow({
         categories={categories}
         subcategories={subcategories}
         compactMode={compactMode}
+        error={error}
         onSubmit={handleSubmit}
         onCancel={onClose}
       />

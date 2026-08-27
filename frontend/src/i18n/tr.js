@@ -120,6 +120,8 @@ export default {
     deleteConfirmMessage:
       "Bu işlem bu kategorideki tüm alt kategorileri ve araçları da silecek. Devam edilsin mi?",
     deleteConfirmTitle: "Kategoriyi sil",
+    saveError: "Kategori kaydedilemedi. Lütfen tekrar deneyin.",
+    deleteError: "Kategori silinemedi. Lütfen tekrar deneyin.",
   },
 
   subcategoriesPage: {
@@ -135,6 +137,9 @@ export default {
     showToolsAria: "{name} içindeki araçları göster",
     deleteConfirmMessage: "Bu alt kategori silinsin mi?",
     deleteConfirmTitle: "Alt kategoriyi sil",
+    categoryRequired: "Önce bir kategori seçin.",
+    saveError: "Alt kategori kaydedilemedi. Lütfen tekrar deneyin.",
+    deleteError: "Alt kategori silinemedi. Lütfen tekrar deneyin.",
   },
 
   toolsPage: {
@@ -205,12 +210,13 @@ export default {
     uninstallConfirmMessage:
       "{name} kaldırılsın mı? Bu, aracı tüm kullanıcılar için Araçlar sayfasından kaldırır.",
     moreActions: "{name} için daha fazla işlem",
-    versionLabel: "v{version}",
     statActive: "Etkin",
     statTemplates: "Şablonlar",
     statInactive: "Devre dışı",
     readOnlyNotice:
       "Araç Merkezi'ni salt okunur modda görüntülüyorsunuz. Araçları kurmak, yapılandırmak veya yönetmek için yönetici olarak giriş yapın.",
+    installError: "{name} kurulamadı. Lütfen tekrar deneyin.",
+    configureError: "{name} için değişiklikler kaydedilemedi. Lütfen tekrar deneyin.",
     bulkSelectItem: "{name} seç",
     bulkSelectAllVisible: "Tümünü seç",
     bulkSelectedCount: "{count} seçildi",
@@ -951,5 +957,84 @@ export default {
       "Bu pencere görüntülenirken bir sorun oluştu. Açık olan diğer pencereleriniz etkilenmedi.",
     retry: "Tekrar dene",
     close: "Pencereyi kapat",
+  },
+
+  setupWizard: {
+    stepWelcome: "Hoş geldiniz",
+    stepMethod: "Kurulum yöntemi",
+    stepSettings: "Temel ayarlar",
+    stepSummary: "Özet",
+    stepConfigure: "Yapılandırılıyor",
+    stepDone: "Tamamlandı",
+
+    welcomeTitle: "Toolbox'a hoş geldiniz",
+    welcomeDescription: "Kurulumunuzu ayarlayalım. Bu yalnızca bir dakika sürer.",
+    welcomeVersion: "Sürüm {version}",
+    getStarted: "Başlayın",
+
+    methodTitle: "Bir kurulum yöntemi seçin",
+    methodDescription:
+      "Temiz bir ortamla başlayabilir veya önceki bir Toolbox yedeğinden her şeyi geri yükleyebilirsiniz.",
+    methodFreshTitle: "Yeni ortam",
+    methodFreshDescription:
+      "Varsayılan ayarlarla yepyeni, boş bir kurulum oluşturun.",
+    methodRestoreTitle: "Yedekten geri yükle",
+    methodRestoreDescription:
+      "Veritabanını ve yapılandırmayı geri yüklemek için bir Toolbox yedek dosyası yükleyin.",
+    restoreUploadLabel: "Yedek dosyası (.db)",
+    restoreValidating: "Yedek dosyası doğrulanıyor...",
+    restoreValid: "Yedek dosyası uygun görünüyor.",
+    restoreInvalid: "Bu dosya doğrulanamadı.",
+    restoreSize: "Boyut",
+    restoreModified: "Son değiştirilme",
+    restoreVersion: "Sürüm",
+    restoreVersionUnavailable: "Mevcut değil",
+    restoreChooseAnother: "Başka bir dosya seçin",
+
+    seedTitle: "Başlangıç içeriği",
+    seedEmptyTitle: "Boş başla",
+    seedEmptyDescription: "Kategori veya araç yok - her şeyi sıfırdan oluşturun.",
+    seedCategoriesTitle: "Kategoriler & alt kategoriler",
+    seedCategoriesDescription:
+      "Hazır bir kategori, alt kategori ve renk seti önceden doldurun.",
+    seedCategoriesAndToolsTitle: "Kategoriler, alt kategoriler & önemli araçlar",
+    seedCategoriesAndToolsDescription:
+      "Yukarıdakiyle aynı, ayrıca her alt kategoriye en kullanışlı araçlardan biri önceden kurulmuş olarak eklenir.",
+
+    settingsTitle: "Temel ayarlar",
+    settingsDescription:
+      "Bunları daha sonra her zaman Yönetim Merkezi'nden veya kendi Ayarlar sayfanızdan değiştirebilirsiniz.",
+    languageLabel: "Dil",
+    timezoneLabel: "Saat dilimi",
+    timezonePreview: "Oradaki güncel saat: {time}",
+    themeLabel: "Tema",
+
+    summaryTitle: "Seçimlerinizi gözden geçirin",
+    summaryDescription: "Her şey doğru mu? Şimdi uygulayalım.",
+    summaryMethod: "Kurulum yöntemi",
+    summaryMethodFresh: "Yeni ortam",
+    summaryMethodRestore: "Yedekten geri yükle",
+    summaryStarterContent: "Başlangıç içeriği",
+    summaryLanguage: "Dil",
+    summaryTimezone: "Saat dilimi",
+    summaryTheme: "Tema",
+    summaryBackupFile: "Yedek dosyası",
+
+    configureTitle: "Toolbox ayarlanıyor",
+    configureStepDatabase: "Veritabanı hazırlanıyor...",
+    configureStepConfig: "Yapılandırma kaydediliyor...",
+    configureStepIntegrity: "Bütünlük kontrolü yapılıyor...",
+    configureStepFinishing: "Tamamlanıyor...",
+    configureFailed: "Kurulum tamamlanamadı.",
+    tryAgain: "Tekrar dene",
+
+    doneTitle: "Toolbox hazır",
+    doneDescription: "Kurulum başarıyla tamamlandı.",
+    startToolbox: "Toolbox'ı başlat",
+
+    back: "Geri",
+    next: "İleri",
+
+    errorGeneric: "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
   },
 };
