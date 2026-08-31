@@ -2,22 +2,21 @@
 
 # Toolbox
 
-Toolbox started as a personal project to solve a simple problem: I was constantly jumping between websites, scripts, and standalone tools to perform everyday IT tasks.
-
 As someone working in IT support and Microsoft 365 administration, I wanted a single platform that brings together the tools I use most often. What began as a small collection of utilities quickly grew into a modern, self-hosted toolbox designed for service desks, system administrators, MSPs, and other IT professionals.
 
-The goal with this project is to create something that is genuinely useful: a platform that saves time, reduces complexity, and gives professionals full control over their data without relying on dozens of separate services.
+The goal with this project is to create something that is genuinely useful: a platform that saves time, reduces complexity, and gives full control over their data without relying on dozens of separate services.
 
 I hope Toolbox can make your daily IT work just a little bit easier.
 
-## Work in Progress
-Toolbox is a personal project developed and maintained in my spare time. While the application is actively used and continuously improved, it is still a work in progress. Not all features are fully implemented, bugs may occur, and documentation may occasionally lag behind the latest changes.
+## Features
 
-There is no fixed roadmap or guaranteed release schedule. New features, improvements, and bug fixes are added when time and availability allow.
-
-Feedback, bug reports, and suggestions are always welcome. Please keep in mind that responses and updates may not be immediate.
-
-Use Toolbox at your own discretion and always test changes in an appropriate environment before deploying them to production.
+- **Tool catalog** — network, mail, security, certificate, identity, and data-encoding tools (DNS lookups, SPF/DMARC/DKIM builders, SSL/certificate inspection, password & secret generation, BSOD/message-trace/sign-in-anomaly analyzers, and more), organized by category and subcategory.
+- **Script Library** — store, tag, and reuse PowerShell/other scripts with templated input fields, favorites, and admin-only visibility.
+- **Tools Center** — browse, enable/disable, and feature tools from a catalog view.
+- **Admin Center** — organization-wide settings in one place: general defaults (language/timezone/theme/clock), authentication (shared password, local users, Microsoft Entra ID, or hybrid), branding (app name/logo/colors/login page), automatic + manual backups with restore, activity logging with retention policies, and system info.
+- **First Startup Wizard** — guided setup on a fresh install: create a new instance or restore from a backup, then set org-wide language/timezone/theme defaults.
+- **Multi-language** — English, Dutch, Frisian, and Turkish, with an org-wide default and a per-browser override.
+- **Multi-window workspace** — open several tools and scripts at once in draggable, resizable floating windows with a taskbar, or fullscreen on mobile.
 
 ## Screenshots
 
@@ -27,21 +26,20 @@ Use Toolbox at your own discretion and always test changes in an appropriate env
 
 ### Tool Example
 
-![DNS Lookup tool](docs/images/tool-example.png)
-
----
+<img src="docs/images/tool-example.png" alt="DNS Lookup tool" width="500" />
 
 ## Installation
 
-For Docker and Portainer deployments see:
+The recommended way to run Toolbox is via Docker and Portainer. See:
 
 [Docker instructions](docker/docker-readme.md)
 
----
+## Work in Progress
+Toolbox is a personal project developed and maintained in my spare time. While the application is actively used and continuously improved, it is still a work in progress. Not all features are fully implemented, bugs may occur, and documentation may occasionally lag behind the latest changes.
 
 ## AI Disclaimer
 
-The tool is completely Built by AI. Prompted by an IT guy. Powered by caffeine.
+The tool is completely Built by Claude Code
 
 ## License
 
