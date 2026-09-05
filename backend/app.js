@@ -225,7 +225,7 @@ app.get("/api", (req, res) => {
   res.json({
     app: "Toolbox API",
     status: "running",
-    version: "0.9.6",
+    version: "0.9.7",
   });
 });
 
