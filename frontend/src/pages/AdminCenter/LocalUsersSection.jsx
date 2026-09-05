@@ -18,6 +18,8 @@ import Card from "../../components/shared/Card";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { api } from "../../services/api";
+import { cardPadding } from "../../core/tokens";
+import "../../styles/hoverCard.css";
 
 const ROLES = ["admin", "user"];
 
@@ -64,7 +66,14 @@ export default function LocalUsersSection({
     api
       .getUsers()
       .then((result) => setUsers(result.users || []))
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+
+        setNotice({
+          status: "error",
+          message: err.message || t("adminCenter.localUsers.loadFailed"),
+        });
+      })
       .finally(() => setLoading(false));
 
   useEffect(() => {
@@ -250,13 +259,11 @@ export default function LocalUsersSection({
   };
 
   return (
-    <div
+    <Card
+      hoverLift={false}
       style={{
-        padding: compactMode ? "12px" : "16px",
-        marginBottom: "20px",
-        background: "var(--surface)",
-        borderRadius: "10px",
-        border: "1px solid var(--border)",
+        padding: compactMode ? cardPadding.compact : cardPadding.normal,
+        marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
         opacity: isAdmin ? 1 : 0.6,
       }}
     >
@@ -325,6 +332,7 @@ export default function LocalUsersSection({
               disabled={createBusy}
               mono
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
 
             <FormField
@@ -334,6 +342,7 @@ export default function LocalUsersSection({
               placeholder="Jane Smith"
               disabled={createBusy}
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
 
             <FormField
@@ -345,6 +354,7 @@ export default function LocalUsersSection({
               disabled={createBusy}
               autoComplete="new-password"
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
 
             <RoleSelect
@@ -354,6 +364,7 @@ export default function LocalUsersSection({
               disabled={createBusy}
               compactMode={compactMode}
               t={t}
+              className="hover-card"
             />
           </div>
 
@@ -403,7 +414,7 @@ export default function LocalUsersSection({
           {users.map((user) => (
             <div key={user.id}>
               <Card
-                hoverShadow
+                hoverLift={false}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -591,6 +602,7 @@ export default function LocalUsersSection({
                       onChange={setEditDisplayName}
                       disabled={editBusy}
                       compactMode={compactMode}
+                      wrapperClassName="hover-card"
                     />
 
                     <RoleSelect
@@ -605,6 +617,7 @@ export default function LocalUsersSection({
                       }
                       compactMode={compactMode}
                       t={t}
+                      className="hover-card"
                     />
                   </div>
 
@@ -657,6 +670,7 @@ export default function LocalUsersSection({
                       disabled={resetBusy}
                       autoComplete="new-password"
                       compactMode={compactMode}
+                      wrapperClassName="hover-card"
                     />
                   </div>
 
@@ -695,7 +709,7 @@ export default function LocalUsersSection({
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -707,9 +721,10 @@ function RoleSelect({
   hint,
   compactMode,
   t,
+  className = "",
 }) {
   return (
-    <div>
+    <div className={className}>
       <label
         style={{
           display: "block",
@@ -738,13 +753,19 @@ function RoleSelect({
           height: compactMode ? "34px" : "38px",
         }}
       >
-        {ROLES.map((role) => (
-          <option key={role} value={role}>
-            {role === "admin"
+        {ROLES.map((role) => ({
+          role,
+          label:
+            role === "admin"
               ? t("adminCenter.localUsers.roleAdmin")
-              : t("adminCenter.localUsers.roleUser")}
-          </option>
-        ))}
+              : t("adminCenter.localUsers.roleUser"),
+        }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .map(({ role, label }) => (
+            <option key={role} value={role}>
+              {label}
+            </option>
+          ))}
       </select>
 
       {hint && (

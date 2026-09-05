@@ -321,9 +321,13 @@ export default function Tools() {
         title={t("toolsPage.title")}
         crumbs={[
           { label: t("nav.dashboard"), to: "/" },
-          { label: t("nav.categories"), to: "/categories" },
+          // "Categories" only belongs in this trail when the list below is
+          // actually filtered by one - Tools isn't a sub-page of Categories,
+          // so showing it unconditionally implied a navigation hierarchy
+          // that doesn't exist.
           ...(selectedCategoryId
             ? [
+                { label: t("nav.categories"), to: "/categories" },
                 {
                   label:
                     categories.find(

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS tools (
   name TEXT NOT NULL,
   description TEXT,
   icon TEXT DEFAULT 'tool',
-  tool_type TEXT DEFAULT 'link',
+  tool_type TEXT DEFAULT 'lookup',
   config TEXT,
   input_template TEXT,
   favorite INTEGER DEFAULT 0,
@@ -213,10 +213,24 @@ INSERT OR IGNORE INTO branding_config (id) VALUES (1);
 -- automatic-backup schedule. Read by routes/backup.js on every scheduling
 -- decision (not cached at boot) so a change takes effect on the next run
 -- without a server restart.
+-- The Layer 2 shared-admin-password token store. Previously an in-memory
+-- Map in routes/auth.js - that meant every restart force-logged-out every
+-- admin, and it made running more than one backend process impossible (each
+-- instance had its own, disjoint set of valid tokens). Persisting it here
+-- makes Layer 2 behave the same way Layer 1's `sessions` table already does.
+-- Only the SHA-256 hash of the token is stored, same reasoning as `sessions`.
+CREATE TABLE IF NOT EXISTS admin_tokens (
+  token_hash TEXT PRIMARY KEY,
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_admin_tokens_expires_at ON admin_tokens(expires_at);
+
 CREATE TABLE IF NOT EXISTS backup_config (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   interval_hours INTEGER NOT NULL DEFAULT 24,
   max_backups INTEGER NOT NULL DEFAULT 10,
+  last_run_at TEXT,
+  last_run_status TEXT,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO backup_config (id) VALUES (1);
@@ -225,9 +239,16 @@ INSERT OR IGNORE INTO backup_config (id) VALUES (1);
 -- Wizard. `completed` gates whether the wizard shows on boot - it is
 -- intentionally independent of auth_config/ADMIN_PASSWORD, since the wizard
 -- never touches the admin credential (that stays fully .env-managed). The
--- chosen language/timezone/theme values are recorded here for the wizard's
--- own summary/audit purposes; nothing else in the app reads timezone today
--- (see routes/setup.js).
+-- chosen language/timezone/theme/time_format values are recorded here for
+-- the wizard's own summary/audit purposes and are also the org-wide
+-- defaults editable later from Admin Center's General tab.
+-- time_mode is 'auto' (follow the system clock, the default) or 'manual'
+-- (admin set the clock by hand once in the General tab, via a date/time
+-- picker). Either way the actual correction is stored the same way:
+-- time_offset_minutes is added to every displayed timestamp app-wide,
+-- independent of timezone - see frontend/src/utils/timeSettings.js. In
+-- 'manual' mode it's the delta computed at save time between the entered
+-- date/time and the real clock; in 'auto' mode it's always 0.
 CREATE TABLE IF NOT EXISTS setup_status (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   completed INTEGER NOT NULL DEFAULT 0,
@@ -235,6 +256,10 @@ CREATE TABLE IF NOT EXISTS setup_status (
   language TEXT,
   timezone TEXT,
   theme TEXT,
+  time_format TEXT,
+  time_mode TEXT NOT NULL DEFAULT 'auto',
+  time_offset_minutes INTEGER NOT NULL DEFAULT 0,
+  font_family TEXT,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO setup_status (id, completed) VALUES (1, 0);

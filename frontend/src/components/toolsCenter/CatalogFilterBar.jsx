@@ -1,7 +1,8 @@
 import { MARKETPLACE_CATEGORIES } from "../../core/marketplaceCategories";
 import { useLanguage } from "../../context/LanguageContext";
-
-const fieldHeight = { compact: "36px", normal: "42px" };
+import ActionButton from "../toolForms/shared/ActionButton";
+import FormField from "../toolForms/shared/FormField";
+import SelectField from "../toolForms/shared/SelectField";
 
 export default function CatalogFilterBar({
   search,
@@ -15,34 +16,6 @@ export default function CatalogFilterBar({
   compactMode,
 }) {
   const { t } = useLanguage();
-  const height = compactMode ? fieldHeight.compact : fieldHeight.normal;
-
-  const fieldStyle = {
-    height,
-    boxSizing: "border-box",
-    background: "var(--surface)",
-    color: "var(--text)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
-    padding: "0 12px",
-    fontSize: "14px",
-    outline: "none",
-  };
-
-  const chipStyle = (active) => ({
-    display: "inline-flex",
-    alignItems: "center",
-    height: "28px",
-    padding: "0 12px",
-    borderRadius: "999px",
-    border: active ? "1px solid transparent" : "1px solid var(--border)",
-    background: active ? "var(--primary)" : "var(--surface)",
-    color: active ? "#ffffff" : "var(--text)",
-    fontSize: "12px",
-    fontWeight: "600",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  });
 
   return (
     <div
@@ -60,42 +33,47 @@ export default function CatalogFilterBar({
           flexWrap: "wrap",
         }}
       >
-        <input
-          placeholder={t("toolsCenter.searchPlaceholder")}
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          style={{
-            ...fieldStyle,
-            width: "100%",
-            maxWidth: "360px",
-          }}
-        />
+        <div style={{ width: "100%", maxWidth: "360px" }}>
+          <FormField
+            placeholder={t("toolsCenter.searchPlaceholder")}
+            value={search}
+            onChange={onSearchChange}
+            compactMode={compactMode}
+          />
+        </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          style={{ ...fieldStyle, minWidth: "170px" }}
-        >
-          <option value="">{t("toolsCenter.allStatuses")}</option>
-          <option value="notInstalled">
-            {t("toolsCenter.statusNotInstalled")}
-          </option>
-          <option value="installed">{t("toolsCenter.statusInstalled")}</option>
-          <option value="active">{t("toolsCenter.statusActive")}</option>
-          <option value="disabled">{t("toolsCenter.statusDisabled")}</option>
-          <option value="featured">{t("toolsCenter.statusFeatured")}</option>
-        </select>
+        <div style={{ minWidth: "170px" }}>
+          <SelectField
+            value={statusFilter}
+            onChange={onStatusFilterChange}
+            compactMode={compactMode}
+            options={[
+              { value: "", label: t("toolsCenter.allStatuses") },
+              {
+                value: "notInstalled",
+                label: t("toolsCenter.statusNotInstalled"),
+              },
+              { value: "installed", label: t("toolsCenter.statusInstalled") },
+              { value: "active", label: t("toolsCenter.statusActive") },
+              { value: "disabled", label: t("toolsCenter.statusDisabled") },
+              { value: "featured", label: t("toolsCenter.statusFeatured") },
+            ]}
+          />
+        </div>
 
-        <select
-          value={sortMode}
-          onChange={(e) => onSortModeChange(e.target.value)}
-          style={{ ...fieldStyle, minWidth: "190px" }}
-        >
-          <option value="name">{t("toolsCenter.sortByName")}</option>
-          <option value="category">{t("toolsCenter.sortByCategory")}</option>
-          <option value="status">{t("toolsCenter.sortByStatus")}</option>
-          <option value="recent">{t("toolsCenter.sortByRecent")}</option>
-        </select>
+        <div style={{ minWidth: "190px" }}>
+          <SelectField
+            value={sortMode}
+            onChange={onSortModeChange}
+            compactMode={compactMode}
+            options={[
+              { value: "name", label: t("toolsCenter.sortByName") },
+              { value: "category", label: t("toolsCenter.sortByCategory") },
+              { value: "status", label: t("toolsCenter.sortByStatus") },
+              { value: "recent", label: t("toolsCenter.sortByRecent") },
+            ]}
+          />
+        </div>
       </div>
 
       <div
@@ -105,25 +83,25 @@ export default function CatalogFilterBar({
           flexWrap: "wrap",
         }}
       >
-        <button
-          type="button"
-          className="a11y-focus-ring"
-          style={chipStyle(!categoryFilter)}
+        <ActionButton
+          variant="chip"
+          active={!categoryFilter}
+          compactMode={compactMode}
           onClick={() => onCategoryFilterChange("")}
         >
           {t("toolsCenter.allCategories")}
-        </button>
+        </ActionButton>
 
         {Object.entries(MARKETPLACE_CATEGORIES).map(([key, meta]) => (
-          <button
+          <ActionButton
             key={key}
-            type="button"
-            className="a11y-focus-ring"
-            style={chipStyle(categoryFilter === key)}
+            variant="chip"
+            active={categoryFilter === key}
+            compactMode={compactMode}
             onClick={() => onCategoryFilterChange(key)}
           >
             {meta.label}
-          </button>
+          </ActionButton>
         ))}
       </div>
     </div>

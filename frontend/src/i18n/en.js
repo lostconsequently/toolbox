@@ -157,6 +157,7 @@ export default {
     favorite: "Favorite",
     featured: "Featured",
     browseToolsCenter: "Browse Tools Center",
+    runCardAria: "Run {name}",
   },
 
   toolForm: {
@@ -265,6 +266,9 @@ export default {
 
   settings: {
     title: "Settings",
+    personalScope: "Personal",
+    orgDefaultNote:
+      "These are your personal preferences for this browser. An administrator can also set organization-wide defaults in Admin Center → General — those only apply to browsers that haven't picked a preference here yet.",
     interfaceHeading: "Interface",
     selectTheme: "Select Theme",
     selectFont: "Select Font",
@@ -303,6 +307,14 @@ export default {
       "How often the Toolbox makes an automatic backup, and how many of them are kept before the oldest is deleted.",
     backupSettingsSaveSuccess: "Backup schedule saved.",
     backupSettingsSaveFailed: "Could not save the backup schedule.",
+    backupLastRun: "Last run",
+    backupLastRunNever: "Never yet",
+    backupNextRun: "Next run",
+    backupRunStatus: {
+      created: "backup created",
+      skipped: "skipped, database was busy",
+      failed: "failed",
+    },
     automaticBackups: "Automatic Backups",
     backupsStored: "{count} / {max} backups stored",
     noAutomaticBackups: "No automatic backups found yet",
@@ -355,6 +367,8 @@ export default {
     download: "Download",
     edit: "Edit",
     delete: "Delete",
+    viewCardAria: "View {name}",
+    moreActions: "More actions for {name}",
     deleteConfirmTitle: "Delete script",
     deleteConfirmMessage:
       "Delete this script? This also removes its template fields.",
@@ -435,13 +449,36 @@ export default {
     tabAbout: "About",
     generalHeading: "General administrator settings",
     generalDescription:
-      "Administrator settings will live here. Backup and restore are on the Backup tab.",
+      "Organization-wide defaults for language, timezone and theme. These only apply to a browser that hasn't already picked its own preference.",
     contentOverview: "Toolbox content",
+    general: {
+      orgScope: "Organization",
+      save: "Save defaults",
+      saveSuccess: "Organization defaults saved.",
+      saveFailed: "Could not save the organization defaults.",
+      loadFailed: "Could not load the current organization defaults.",
+      localizationHeading: "Language & theme",
+      fontLabel: "Font",
+      timeHeading: "Time",
+      timeFormatLabel: "Clock format",
+      timeFormat24h: "24-hour",
+      timeFormat12h: "12-hour (AM/PM)",
+      timeModeLabel: "Clock source",
+      timeModeAuto: "Automatic",
+      timeModeManual: "Manual",
+      timeModeAutoHint: "Follows the server's own system clock.",
+      timeModeManualHint:
+        "Set what time it should be right now - every displayed time app-wide is shifted by the difference, until changed back to Automatic.",
+      timeManualLabel: "Set current date & time",
+      timeManualHint:
+        "Sets an offset from the real time - every displayed timestamp app-wide shifts by the difference, until switched back to Automatic.",
+      timeManualInvalid: "Enter a valid date and time.",
+    },
     authentication: {
       heading: "Authentication",
       description:
         "Optionally require sign-in before Toolbox can be used. Disabled by default - existing admin access is unaffected either way.",
-      modeLabel: "Mode",
+      modeLabel: "Authentication mode",
       modeDisabled: "Disabled",
       modeDisabledHint: "Anyone can open Toolbox without signing in.",
       modeLocal: "Local password",
@@ -449,10 +486,16 @@ export default {
       modeLocalUsers: "Local users",
       modeLocalUsersHint:
         "Require a username and password from the Local Users list below.",
+      modeLocalUsersBetaNote:
+        "Beta: per-user roles and audit logging are new and haven't seen production use at scale yet. Test with a spare account before rolling out to your team.",
       modeEntra: "Microsoft Entra ID (SSO)",
       modeEntraHint: "Require Microsoft sign-in - no local password option.",
+      modeEntraBetaNote:
+        "Beta: group/user allow-list matching is new. Verify sign-in works for a test user before removing other login options.",
       modeHybrid: "Hybrid (Local + Entra ID)",
       modeHybridHint: "Allow either Microsoft sign-in or the local password.",
+      modeHybridBetaNote:
+        "Beta: combines the Local users and Entra ID beta features above - review both notes before enabling.",
       comingSoon: "Coming soon",
       sessionTimeoutLabel: "Session timeout (minutes)",
       sessionTimeoutHint:
@@ -468,12 +511,13 @@ export default {
       saving: "Saving...",
       saveSuccess: "Authentication settings saved.",
       saveFailed: "Could not save authentication settings.",
+      loadFailed: "Could not load authentication settings.",
       recoveryKeyLabel: "Recovery key",
       recoveryKeyConfigured: "Configured",
       recoveryKeyMissing: "Not configured",
       recoveryKeyHeading: "Recovery key",
       recoveryKeyDescription:
-        "A recovery key resets the local password if it's ever lost. Generating a new key immediately invalidates the previous one - only one works at a time.",
+        "A recovery key resets the local admin password if it's ever lost. Generating a new key immediately invalidates the previous one - only one works at a time. This only covers the single local admin account - it cannot reset a Local Users account or an Entra ID sign-in.",
       recoveryKeyGenerate: "Generate new recovery key",
       recoveryKeyGenerating: "Generating...",
       recoveryKeyConfirm:
@@ -486,8 +530,14 @@ export default {
       entraEncryptionKeyMissing:
         "AUTH_ENCRYPTION_KEY isn't set on the server, so the client secret can't be saved yet. Set it in the backend's .env file, then restart the server.",
       entraTenantIdLabel: "Tenant ID",
+      entraTenantIdHint:
+        "Found in the Entra admin center under your app registration's Overview page - also called the Directory (tenant) ID.",
       entraClientIdLabel: "Client ID",
+      entraClientIdHint:
+        "Found on the same Overview page as the Tenant ID - also called the Application (client) ID.",
       entraClientSecretLabel: "Client Secret",
+      entraClientSecretHint:
+        "Created under the app registration's 'Certificates & secrets' page. Only the value shown at creation time works here - it can't be retrieved again later.",
       entraClientSecretPlaceholder: "Enter the client secret",
       entraClientSecretKeepPlaceholder:
         "Leave blank to keep the current secret",
@@ -508,6 +558,7 @@ export default {
     },
     localUsers: {
       heading: "Local Users",
+      loadFailed: "Could not load the list of local users.",
       description:
         "Manage the accounts that can sign in with a username and password. Entra ID accounts also appear here once they've signed in at least once.",
       addUser: "Add user",
@@ -549,6 +600,75 @@ export default {
       actionFailed: "That action failed.",
       empty: "No users yet.",
     },
+    backup: {
+      heading: "Data Management & Backup",
+      manualBackupHeading: "Manual backup",
+      downloadDatabase: "Download Database",
+      downloadDatabaseTitle: "Download database backup",
+      restoreDatabase: "Restore Database",
+      restoreDatabaseTitle: "Restore backup",
+      backupCenter: "Database Backup Center",
+      lastBackup: "Last backup:",
+      never: "Never",
+      backupAvailable: "Database backup available",
+      noBackupYet: "No database backup yet",
+      backupStatusLabel: "Status",
+      backupScheduleHeading: "Automatic backup schedule",
+      backupIntervalLabel: "Backup interval (hours)",
+      backupIntervalHint: "How often the Toolbox makes an automatic backup.",
+      maxBackupsLabel: "Maximum backups to keep",
+      maxBackupsHint:
+        "How many automatic backups are kept before the oldest is deleted.",
+      backupScheduleHint:
+        "How often the Toolbox makes an automatic backup, and how many of them are kept before the oldest is deleted.",
+      scheduleSaveSuccess: "Backup schedule saved.",
+      scheduleSaveFailed: "Could not save the backup schedule.",
+      loadBackupsFailed: "Could not load the list of backups.",
+      loadScheduleFailed: "Could not load the backup schedule.",
+      backupLastRun: "Last run",
+      backupLastRunNever: "Never yet",
+      backupNextRun: "Next run",
+      backupRunStatus: {
+        created: "backup created",
+        skipped: "skipped, database was busy",
+        failed: "failed",
+      },
+      automaticBackups: "Automatic Backups",
+      backupsStored: "{count} / {max} backups stored",
+      moreActions: "More actions for {name}",
+      noAutomaticBackups: "No automatic backups found yet",
+      downloadFailed: "Database download failed.",
+      restoreConfirm: "The current database will be overwritten. Continue?",
+      restoreConfirmStep2:
+        "Are you sure? This cannot be undone - all data added since the uploaded file was made will be lost.",
+      restoreSuccess:
+        "Database successfully restored. The Toolbox will now reload.",
+      restoreFailed: "Restore failed.",
+      backupTypeAutomatic: "Automatic",
+      backupTypeSafety: "Safety backup",
+      backupTypeUnknown: "Unknown",
+      downloadBackup: "Download",
+      downloadBackupTitle: "Download this backup",
+      downloadBackupFailed: "Backup download failed.",
+      restoreBackup: "Restore",
+      restoreBackupTitle: "Restore this backup",
+      restoreBackupInProgress: "Restoring...",
+      restoreBackupStep1Warning:
+        "Restoring a backup will overwrite the current database. All changes made since this backup will be lost.",
+      restoreBackupPrepareFailed:
+        "Could not create a safety backup. Restore cancelled.",
+      safetyBackupDownloadFailed:
+        "Could not download the safety backup, but it was still created on the server before continuing.",
+      restoreBackupStep3Confirm:
+        "A safety backup of the current state has been made first ({file}). Are you sure you want to restore the selected backup?",
+      restoreCancelFailed:
+        "Could not cancel the restore session on the server - it will expire on its own shortly.",
+      restoreBackupSuccessDetail:
+        "Backup successfully restored: {file} ({time}).",
+      restoreBackupFailedRolledBack:
+        "Restore failed. The database was automatically rolled back to its previous state.",
+      refreshPrompt: "Refresh the page now to see the changes?",
+    },
     branding: {
       heading: "Branding",
       description:
@@ -580,7 +700,11 @@ export default {
       imageRemoveFailed: "Could not remove the image.",
       themeHeading: "Theme colors",
       primaryColorLabel: "Primary color",
+      primaryColorHint:
+        "Used for buttons, links, and the sign-in button throughout the app.",
       accentColorLabel: "Accent color",
+      accentColorHint:
+        "Used sparingly, for the active sidebar item's highlight bar.",
       invalidColor: "Colors must be a hex value like #3b82f6.",
       loginHeading: "Login page",
       loginTitleLabel: "Login title",
@@ -605,6 +729,7 @@ export default {
       previewLogin: "Login screen",
     },
     about: {
+      loadFailed: "Could not load system information.",
       applicationInfo: "Application information",
       version: "Version",
       release: "Release",
@@ -669,11 +794,13 @@ export default {
       retentionSystemLabel: "System log retention (days)",
       retentionErrorLabel: "Error log retention (days)",
       retentionSecurityLabel: "Audit/security log retention (days)",
+      retentionDaysHint: "0 days keeps entries forever.",
       retentionMaxRowsLabel: "Maximum stored log entries",
       retentionHint:
-        "0 days keeps entries forever. The maximum entry count is enforced regardless of age, as a safety cap.",
+        "Enforced regardless of age, as a safety cap independent of the retention settings above.",
       retentionSaved: "Retention settings saved.",
       retentionSaveFailed: "Could not save retention settings.",
+      retentionLoadFailed: "Could not load retention settings.",
       purgeHeading: "Purge logs",
       purgeScopeLabel: "Scope",
       purgeScope: {
@@ -1075,6 +1202,7 @@ export default {
     configureStepFinishing: "Finishing up...",
     configureFailed: "Setup could not be completed.",
     tryAgain: "Try again",
+    startOver: "Start over",
 
     doneTitle: "Toolbox is ready",
     doneDescription: "Setup completed successfully.",

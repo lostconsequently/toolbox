@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollText, Settings2 } from "lucide-react";
 
-import Badge from "../../../components/shared/Badge";
 import LogFilterBar from "./LogFilterBar";
 import LogTable from "./LogTable";
 import LogDetailDrawer from "./LogDetailDrawer";
 import LogRetentionSettings from "./LogRetentionSettings";
 import LogExportButton from "./LogExportButton";
+import Card from "../../../components/shared/Card";
 import { useAdmin } from "../../../context/AdminContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import { useSettings } from "../../../context/SettingsContext";
 import { api } from "../../../services/api";
+import { cardPadding } from "../../../core/tokens";
 
 const DEFAULT_FILTERS = {
   level: [],
@@ -96,79 +97,42 @@ export default function LoggingTab({ confirm, setNotice }) {
     loadPage(true);
   };
 
+  const cardStyle = {
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
+  };
+
   return (
-    <div
-      style={{
-        background: "var(--card)",
-        padding: compactMode ? "14px" : "20px",
-        borderRadius: "12px",
-        marginBottom: compactMode ? "14px" : "20px",
-        border: "1px solid var(--border)",
-        opacity: isAdmin ? 1 : 0.6,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "10px",
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h2
+    <div style={{ opacity: isAdmin ? 1 : 0.6 }}>
+      <Card style={cardStyle} hoverLift={false}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "10px",
+            flexWrap: "wrap",
+            marginBottom: "14px",
+          }}
+        >
+          <div
             style={{
-              marginTop: 0,
-              marginBottom: "4px",
               display: "flex",
               alignItems: "center",
               gap: "8px",
             }}
           >
-            {t("adminCenter.logging.heading")}
+            <ScrollText size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.logging.eventsHeading")}
+            </h3>
+          </div>
 
-            <Badge
-              label={t("common.beta")}
-              color="var(--status-warning)"
-              variant="soft"
-              compactMode
-            />
-          </h2>
-
-          <p style={{ color: "var(--subtle)", margin: 0 }}>
-            {t("adminCenter.logging.description")}
-          </p>
-        </div>
-
-        <LogExportButton
-          filters={filters}
-          compactMode={compactMode}
-          setNotice={setNotice}
-        />
-      </div>
-
-      <div
-        style={{
-          marginTop: "18px",
-          padding: compactMode ? "12px" : "16px",
-          background: "var(--surface)",
-          borderRadius: "10px",
-          border: "1px solid var(--border)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginBottom: "14px",
-          }}
-        >
-          <ScrollText size={16} />
-          <h3 style={{ margin: 0 }}>
-            {t("adminCenter.logging.eventsHeading")}
-          </h3>
+          <LogExportButton
+            filters={filters}
+            compactMode={compactMode}
+            setNotice={setNotice}
+          />
         </div>
 
         <LogFilterBar
@@ -184,17 +148,9 @@ export default function LoggingTab({ confirm, setNotice }) {
           compactMode={compactMode}
           loading={loading}
         />
-      </div>
+      </Card>
 
-      <div
-        style={{
-          marginTop: "16px",
-          padding: compactMode ? "12px" : "16px",
-          background: "var(--surface)",
-          borderRadius: "10px",
-          border: "1px solid var(--border)",
-        }}
-      >
+      <Card style={cardStyle} hoverLift={false}>
         <div
           style={{
             display: "flex",
@@ -216,7 +172,7 @@ export default function LoggingTab({ confirm, setNotice }) {
           compactMode={compactMode}
           onPurged={refresh}
         />
-      </div>
+      </Card>
 
       <LogDetailDrawer
         entry={selectedEntry}

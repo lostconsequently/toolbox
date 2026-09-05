@@ -1,11 +1,13 @@
-import { FileCode, Lock, Star } from "lucide-react";
+import { FileCode, Lock, Pencil, Star, Trash2 } from "lucide-react";
 
 import Card from "./shared/Card";
 import Badge from "./shared/Badge";
-import ActionButton from "./toolForms/shared/ActionButton";
+import CardMenu from "./shared/CardMenu";
 import { useAdmin } from "../context/AdminContext";
 import { useSettings } from "../context/SettingsContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { MOBILE_BREAKPOINT_QUERY } from "../core/tokens";
 
 const BADGE_COLUMN_WIDTH = 172;
 const BADGE_COLUMN_WIDTH_COMPACT = 150;
@@ -24,6 +26,7 @@ export default function ScriptListRow({
   const { t } = useLanguage();
 
   const compactMode = settings?.compactMode || false;
+  const isMobile = useMediaQuery(MOBILE_BREAKPOINT_QUERY);
   const badgeColumnWidth = compactMode
     ? BADGE_COLUMN_WIDTH_COMPACT
     : BADGE_COLUMN_WIDTH;
@@ -31,14 +34,26 @@ export default function ScriptListRow({
   return (
     <Card
       hoverShadow
+      role="button"
       tabIndex={0}
+      onClick={() => onView(script)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onView(script);
+        }
+      }}
+      aria-label={t("scriptLibrary.viewCardAria", { name: script.title })}
       style={{
         padding: compactMode ? "8px 10px" : "10px 12px",
         marginBottom: compactMode ? "6px" : "8px",
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1.6fr) minmax(0, 1.1fr) auto",
+        gridTemplateColumns: isMobile
+          ? "1fr"
+          : "minmax(0, 1.6fr) minmax(0, 1.1fr) auto",
         gap: compactMode ? "8px" : "12px",
-        alignItems: "center",
+        alignItems: isMobile ? "stretch" : "center",
+        cursor: "pointer",
       }}
     >
       <div
@@ -89,9 +104,11 @@ export default function ScriptListRow({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `${badgeColumnWidth}px minmax(0, 1fr)`,
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : `${badgeColumnWidth}px minmax(0, 1fr)`,
           gap: compactMode ? "8px" : "12px",
-          alignItems: "center",
+          alignItems: isMobile ? "start" : "center",
           minWidth: 0,
         }}
       >
@@ -147,14 +164,17 @@ export default function ScriptListRow({
         style={{
           display: "flex",
           gap: compactMode ? "6px" : "8px",
-          justifyContent: "flex-end",
+          justifyContent: isMobile ? "flex-start" : "flex-end",
           alignItems: "center",
-          flexWrap: "nowrap",
+          flexWrap: isMobile ? "wrap" : "nowrap",
           flexShrink: 0,
         }}
       >
         <button
-          onClick={() => onToggleFavorite(script)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(script);
+          }}
           title={t("scriptLibrary.favorite")}
           aria-label={t("scriptLibrary.favorite")}
           className="a11y-focus-ring"
@@ -175,30 +195,25 @@ export default function ScriptListRow({
           />
         </button>
 
-        <ActionButton onClick={() => onView(script)} compactMode={compactMode}>
-          {t("scriptLibrary.view")}
-        </ActionButton>
-
         {isAdmin && (
-          <ActionButton
-            onClick={() => onEdit(script)}
-            title={t("scriptLibrary.edit")}
-            variant="edit"
-            compactMode={compactMode}
-          >
-            {t("scriptLibrary.edit")}
-          </ActionButton>
-        )}
-
-        {isAdmin && (
-          <ActionButton
-            onClick={() => onDelete(script.id)}
-            title={t("scriptLibrary.delete")}
-            variant="danger"
-            compactMode={compactMode}
-          >
-            {t("scriptLibrary.delete")}
-          </ActionButton>
+          <CardMenu
+            ariaLabel={t("scriptLibrary.moreActions", {
+              name: script.title,
+            })}
+            items={[
+              {
+                label: t("scriptLibrary.edit"),
+                icon: <Pencil size={14} />,
+                onClick: () => onEdit(script),
+              },
+              {
+                label: t("scriptLibrary.delete"),
+                icon: <Trash2 size={14} />,
+                onClick: () => onDelete(script.id),
+                danger: true,
+              },
+            ]}
+          />
         )}
       </div>
     </Card>

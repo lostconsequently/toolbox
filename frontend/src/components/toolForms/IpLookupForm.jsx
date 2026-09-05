@@ -151,7 +151,10 @@ export default function IpLookupForm({ compactMode = false }) {
         <div
           style={{
             marginTop: "10px",
-            color: validInput || !normalizedInput ? "var(--subtle)" : "#f59e0b",
+            color:
+              validInput || !normalizedInput
+                ? "var(--subtle)"
+                : "var(--status-warning)",
             fontSize: "13px",
           }}
         >

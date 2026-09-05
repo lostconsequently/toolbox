@@ -208,11 +208,11 @@ export default function WhoisLookupForm({ compactMode = false }) {
             }
             color={
               expirationStatus === "success"
-                ? "#16a34a"
+                ? "var(--status-success)"
                 : expirationStatus === "warning"
-                  ? "#f59e0b"
+                  ? "var(--status-warning)"
                   : expirationStatus === "error"
-                    ? "#dc2626"
+                    ? "var(--status-error)"
                     : undefined
             }
           />

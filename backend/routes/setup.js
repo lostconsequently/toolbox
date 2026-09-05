@@ -12,8 +12,10 @@ const {
   getSetupStatus,
   isSetupComplete,
   markSetupComplete,
+  updateOrgDefaults,
 } = require("../services/setupService");
 const { applyCategoryPreset } = require("../services/setupSeedService");
+const { requireAdmin } = require("./auth");
 const {
   isSqliteDatabase,
   verifySqliteIntegrity,
@@ -84,6 +86,73 @@ async function requireSetupIncomplete(req, res, next) {
 router.get("/status", async (req, res, next) => {
   try {
     const status = await getSetupStatus();
+
+    res.json(status);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Lets an admin change the org-wide language/timezone/theme defaults after
+// setup, from Admin Center's General tab - unlike everything else in this
+// file, reachable regardless of whether setup is complete (it always is,
+// by the time an admin can even reach Admin Center) and gated by the
+// regular requireAdmin instead of requireSetupIncomplete.
+router.put("/defaults", requireAdmin, async (req, res, next) => {
+  try {
+    const {
+      language,
+      timezone,
+      theme,
+      timeFormat,
+      timeMode,
+      timeOffsetMinutes,
+      fontFamily,
+    } = req.body || {};
+
+    if (
+      timeMode !== undefined &&
+      timeMode !== null &&
+      timeMode !== "" &&
+      timeMode !== "auto" &&
+      timeMode !== "manual"
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Time mode must be 'auto' or 'manual'.",
+        code: "setup.invalidTimeMode",
+      });
+    }
+
+    let offset;
+
+    if (timeOffsetMinutes !== undefined && timeOffsetMinutes !== null) {
+      offset = Number(timeOffsetMinutes);
+
+      // A manual date/time entry can legitimately be far off if the
+      // server's own clock is badly wrong (wrong year, dead RTC battery,
+      // etc.) - a year in either direction is generous enough to cover a
+      // real correction while still rejecting obvious garbage input.
+      const ONE_YEAR_MINUTES = 365 * 24 * 60;
+
+      if (!Number.isInteger(offset) || Math.abs(offset) > ONE_YEAR_MINUTES) {
+        return res.status(400).json({
+          success: false,
+          error: `Time offset must be a whole number of minutes between -${ONE_YEAR_MINUTES} and ${ONE_YEAR_MINUTES}.`,
+          code: "setup.invalidTimeOffset",
+        });
+      }
+    }
+
+    const status = await updateOrgDefaults({
+      language,
+      timezone,
+      theme,
+      timeFormat,
+      timeMode,
+      timeOffsetMinutes: offset,
+      fontFamily,
+    });
 
     res.json(status);
   } catch (err) {
@@ -200,7 +269,7 @@ router.post("/restore/cancel", requireSetupIncomplete, (req, res) => {
 });
 
 router.post("/complete", requireSetupIncomplete, async (req, res, next) => {
-  const { language, timezone, theme, restoreToken, seedOption } =
+  const { language, timezone, theme, timeFormat, restoreToken, seedOption } =
     req.body || {};
 
   let session = null;
@@ -242,8 +311,6 @@ router.post("/complete", requireSetupIncomplete, async (req, res, next) => {
         code: "setup.busy",
       });
     }
-
-    pendingSetupRestores.delete(restoreToken);
 
     const backupDir = getBackupDir();
     const safetyBackupPath = path.join(
@@ -291,12 +358,15 @@ router.post("/complete", requireSetupIncomplete, async (req, res, next) => {
 
       releaseDbLock();
 
-      try {
-        fs.unlinkSync(session.tempFilePath);
-      } catch {
-        // Already gone - fine.
-      }
-
+      // Deliberately NOT deleting the session/temp file here: the source
+      // backup already passed re-validation above, so whatever failed was
+      // on the live-DB side (copy/reopen/integrity), which a plain retry
+      // with the same token may well succeed at on a second attempt. The
+      // wizard's "Try again" button resubmits the same restoreToken - if it
+      // pointed at a session that no longer existed, every retry would
+      // immediately fail with an unrelated "unknown session" error instead
+      // of actually retrying anything. The TTL sweep still reaps it if the
+      // admin abandons the wizard instead of retrying.
       return res.status(500).json({
         success: false,
         error:
@@ -304,6 +374,8 @@ router.post("/complete", requireSetupIncomplete, async (req, res, next) => {
         code: "setup.restoreFailedRolledBack",
       });
     }
+
+    pendingSetupRestores.delete(restoreToken);
 
     try {
       fs.unlinkSync(session.tempFilePath);
@@ -377,6 +449,7 @@ router.post("/complete", requireSetupIncomplete, async (req, res, next) => {
       language,
       timezone,
       theme,
+      timeFormat,
     });
 
     logInfo({

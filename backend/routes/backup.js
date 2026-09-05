@@ -10,6 +10,7 @@ const { validate, validationError } = require("../utils/validate");
 const {
   getBackupConfig,
   setBackupConfig,
+  recordBackupRun,
 } = require("../services/backupConfigService");
 const {
   logInfo,
@@ -122,6 +123,9 @@ setInterval(() => {
   }
 }, 60 * 1000).unref();
 
+// Returns "created" | "skipped" | "failed" so the scheduler can log and
+// persist an accurate outcome instead of assuming every non-throwing call
+// means a backup actually got made.
 async function createAutomaticBackup() {
   if (!tryAcquireDbLock()) {
     logWarning({
@@ -131,7 +135,7 @@ async function createAutomaticBackup() {
       message:
         "Automatic backup skipped: the database is busy with another backup/restore action.",
     });
-    return;
+    return "skipped";
   }
 
   try {
@@ -171,10 +175,12 @@ async function createAutomaticBackup() {
         });
       }
 
-      return;
+      return "failed";
     }
 
     await cleanupOldBackups(backupDir);
+
+    return "created";
   } finally {
     releaseDbLock();
   }
@@ -868,25 +874,53 @@ router.post("/restore-from-backup/commit", async (req, res) => {
 // is re-read from the database at the start of every cycle.
 let backupTimer = null;
 
+// How long until the next run should fire, given the configured interval
+// and when the last run actually happened. Shared by scheduleNextBackup
+// (to set the real timer) and GET /config (to report nextRunAt) so the two
+// can never disagree.
+function computeDelayMs(intervalMs, lastRunAt) {
+  if (!lastRunAt) {
+    return intervalMs;
+  }
+
+  const elapsed = Date.now() - new Date(lastRunAt).getTime();
+
+  return Math.max(0, intervalMs - elapsed);
+}
+
 async function scheduleNextBackup() {
   if (backupTimer) {
     clearTimeout(backupTimer);
     backupTimer = null;
   }
 
-  const { intervalHours } = await getBackupConfig();
+  const { intervalHours, lastRunAt } = await getBackupConfig();
   const intervalMs = Math.max(1, intervalHours) * 60 * 60 * 1000;
 
-  backupTimer = setTimeout(async () => {
-    try {
-      await createAutomaticBackup();
+  // Based on lastRunAt rather than always the full interval, so a process
+  // restart doesn't reset the clock - a host that restarts often (crashes,
+  // deploys) would otherwise silently back up far less often than
+  // configured, since every restart used to re-arm the full interval from
+  // zero regardless of how much of it had already elapsed.
+  const delayMs = computeDelayMs(intervalMs, lastRunAt);
 
-      logInfo({
-        category: "system",
-        eventType: "backup.created",
-        source: "BACKUP",
-        message: "Automatic database backup created",
-      });
+  backupTimer = setTimeout(async () => {
+    let status = "failed";
+
+    try {
+      status = await createAutomaticBackup();
+
+      // Only the real "a new backup file was written" outcome is worth its
+      // own success line - "skipped"/"failed" already logged their own
+      // specific reason inside createAutomaticBackup().
+      if (status === "created") {
+        logInfo({
+          category: "system",
+          eventType: "backup.created",
+          source: "BACKUP",
+          message: "Automatic database backup created",
+        });
+      }
     } catch (err) {
       logError({
         category: "error",
@@ -896,9 +930,10 @@ async function scheduleNextBackup() {
         error: err,
       });
     } finally {
+      await recordBackupRun(status).catch(() => {});
       scheduleNextBackup();
     }
-  }, intervalMs);
+  }, delayMs);
 
   backupTimer.unref();
 }
@@ -931,7 +966,12 @@ router.get("/config", async (req, res, next) => {
   try {
     const config = await getBackupConfig();
 
-    res.json(config);
+    const intervalMs = Math.max(1, config.intervalHours) * 60 * 60 * 1000;
+    const nextRunAt = new Date(
+      Date.now() + computeDelayMs(intervalMs, config.lastRunAt),
+    ).toISOString();
+
+    res.json({ ...config, nextRunAt });
   } catch (err) {
     next(err);
   }
@@ -951,7 +991,12 @@ router.put("/config", async (req, res, next) => {
     // currently-scheduled run to fire on the old cadence.
     scheduleNextBackup();
 
-    res.json(updated);
+    const intervalMs = Math.max(1, updated.intervalHours) * 60 * 60 * 1000;
+    const nextRunAt = new Date(
+      Date.now() + computeDelayMs(intervalMs, updated.lastRunAt),
+    ).toISOString();
+
+    res.json({ ...updated, nextRunAt });
   } catch (err) {
     next(err);
   }

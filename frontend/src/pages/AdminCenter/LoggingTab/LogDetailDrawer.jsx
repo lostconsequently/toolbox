@@ -3,7 +3,9 @@ import { X } from "lucide-react";
 import LevelBadge from "../../../components/shared/LevelBadge";
 import ActionButton from "../../../components/toolForms/shared/ActionButton";
 import { useLanguage } from "../../../context/LanguageContext";
+import { useTimeSettings } from "../../../context/TimeSettingsContext";
 import { useModalA11y } from "../../../hooks/useModalA11y";
+import { modal } from "../../../core/tokens";
 
 function DetailRow({ label, value }) {
   if (!value) return null;
@@ -37,24 +39,23 @@ function DetailRow({ label, value }) {
 }
 
 export default function LogDetailDrawer({ entry, onClose }) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const { formatDateTime } = useTimeSettings();
   const containerRef = useModalA11y({ isOpen: Boolean(entry), onClose });
 
   if (!entry) return null;
 
-  const timestamp = new Date(entry.createdAt).toLocaleString(
-    language === "nl" ? "nl-NL" : "en-US",
-  );
+  const timestamp = formatDateTime(new Date(entry.createdAt));
 
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0, 0, 0, 0.5)",
+        background: modal.scrim,
         display: "flex",
         justifyContent: "flex-end",
-        zIndex: 10001,
+        zIndex: modal.zIndex,
       }}
       onClick={onClose}
     >
@@ -100,7 +101,7 @@ export default function LogDetailDrawer({ entry, onClose }) {
               padding: "4px",
             }}
           >
-            <X size={18} />
+            <X size={15} />
           </button>
         </div>
 

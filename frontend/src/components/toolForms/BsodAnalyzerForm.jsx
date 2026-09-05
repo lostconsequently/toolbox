@@ -575,10 +575,10 @@ export default function BsodAnalyzerForm({ compactMode = false }) {
             {errorLines.length ? (
               errorLines.map((line, index) => (
                 <div
-                  key={index}
+                  key={`${index}-${line}`}
                   style={{
                     padding: "12px",
-                    border: "1px solid #dc2626",
+                    border: "1px solid var(--status-error)",
                     borderRadius: "8px",
                     background: "var(--surface)",
                     fontFamily: "var(--font-mono, monospace)",
@@ -611,10 +611,10 @@ export default function BsodAnalyzerForm({ compactMode = false }) {
             {infoLines.length ? (
               infoLines.map((line, index) => (
                 <div
-                  key={index}
+                  key={`${index}-${line}`}
                   style={{
                     padding: "12px",
-                    border: "1px solid #16a34a",
+                    border: "1px solid var(--status-success)",
                     borderRadius: "8px",
                     background: "var(--surface)",
                     fontFamily: "var(--font-mono, monospace)",
@@ -647,7 +647,7 @@ export default function BsodAnalyzerForm({ compactMode = false }) {
             {firmwareReferences.length ? (
               firmwareReferences.map((line, index) => (
                 <div
-                  key={index}
+                  key={`${index}-${line}`}
                   style={{
                     padding: "10px",
                     border: "1px solid var(--border)",

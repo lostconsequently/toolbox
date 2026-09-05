@@ -10,6 +10,7 @@ import ActionButton from "./toolForms/shared/ActionButton";
 import ActionRow from "./toolForms/shared/ActionRow";
 import CheckboxOption from "./toolForms/shared/CheckboxOption";
 import ScriptFieldEditor, { createEmptyField } from "./ScriptFieldEditor";
+import { modal } from "../core/tokens";
 
 function parseTags(tagsJson) {
   try {
@@ -273,11 +274,11 @@ export default function ScriptForm({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0, 0, 0, 0.6)",
+        background: modal.scrim,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 10001,
+        zIndex: modal.zIndex,
         padding: "20px",
       }}
       onClick={onClose}
@@ -296,7 +297,7 @@ export default function ScriptForm({
         style={{
           background: "var(--card)",
           border: "1px solid var(--border)",
-          borderRadius: "14px",
+          borderRadius: modal.panelRadius,
           padding: "20px",
           width: "100%",
           maxWidth: "760px",

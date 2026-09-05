@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import InfoTooltip from "../../shared/InfoTooltip";
+import "../../../styles/hoverCard.css";
+
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
 const DEFAULT_PRESETS = [
@@ -26,6 +29,7 @@ export default function ColorField({
   compactMode = false,
   presets = DEFAULT_PRESETS,
   hint,
+  className = "",
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
@@ -74,12 +78,15 @@ export default function ColorField({
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative", display: "inline-block" }}
+      className={className}
+      style={{ position: "relative" }}
     >
       {label && (
         <label
           style={{
-            display: "block",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
             marginBottom: "6px",
             color: "var(--subtle)",
             fontSize: "12px",
@@ -87,6 +94,7 @@ export default function ColorField({
           }}
         >
           {label}
+          {hint && <InfoTooltip text={hint} />}
         </label>
       )}
 
@@ -100,6 +108,7 @@ export default function ColorField({
           display: "flex",
           alignItems: "center",
           gap: "8px",
+          width: "100%",
           height: triggerHeight,
           boxSizing: "border-box",
           padding: "0 10px 0 6px",
@@ -254,14 +263,6 @@ export default function ColorField({
           >
             Custom…
           </button>
-        </div>
-      )}
-
-      {hint && (
-        <div
-          style={{ fontSize: "11px", color: "var(--subtle)", marginTop: "6px" }}
-        >
-          {hint}
         </div>
       )}
     </div>

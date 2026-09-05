@@ -57,8 +57,16 @@ function getPresets(t) {
   ];
 }
 
+// A client-only identity for React list keys and drag/remove tracking -
+// never serialized (cleanFields below only copies the known template keys),
+// so it never ends up in the saved tool config.
+function createFieldKey() {
+  return crypto.randomUUID();
+}
+
 function createDefaultField() {
   return {
+    _key: createFieldKey(),
     label: "",
     name: "input",
     type: "text",
@@ -111,6 +119,7 @@ function parseTemplate(value) {
     }
 
     return parsed.map((field) => ({
+      _key: createFieldKey(),
       label: field.label || "",
       name: field.name || createFieldName(field.label || ""),
       type: field.type || "text",
@@ -189,6 +198,7 @@ export default function InputTemplateBuilder({
     syncFields([
       ...fields,
       {
+        _key: createFieldKey(),
         label: "",
         name: "nieuwVeld",
         type: "text",
@@ -203,6 +213,7 @@ export default function InputTemplateBuilder({
     syncFields([
       ...fields,
       {
+        _key: createFieldKey(),
         label: preset.label,
         name: preset.name,
         type: preset.type,
@@ -408,7 +419,7 @@ export default function InputTemplateBuilder({
         {fields.map((field, index) => {
           return (
             <div
-              key={index}
+              key={field._key ?? index}
               style={{
                 position: "relative",
                 padding: "12px",
@@ -537,7 +548,7 @@ export default function InputTemplateBuilder({
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: "#dc2626",
+                      background: "var(--status-error)",
                       border: "none",
                       padding: compactMode ? "7px 9px" : "8px 10px",
                       borderRadius: "8px",

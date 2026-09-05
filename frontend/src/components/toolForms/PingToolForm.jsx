@@ -604,7 +604,11 @@ export default function PingToolForm({ compactMode = false }) {
             compactMode={compactMode}
             label="Packet loss"
             value={summary ? `${summary.lossPercent}%` : "Not available"}
-            color={summary && summary.lossPercent > 0 ? "#dc2626" : undefined}
+            color={
+              summary && summary.lossPercent > 0
+                ? "var(--status-error)"
+                : undefined
+            }
           />
 
           <InfoTile

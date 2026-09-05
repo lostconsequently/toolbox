@@ -107,6 +107,13 @@ export default function MethodStep({ wizardState, patchState, onNext, onBack }) 
 
     if (!file) return;
 
+    // Picking a new file (including via "Choose a different file") always
+    // supersedes any previously prepared upload - release it server-side
+    // instead of leaving it to expire on its own via the TTL sweep.
+    if (wizardState.restoreToken) {
+      api.cancelSetupRestore(wizardState.restoreToken).catch(() => {});
+    }
+
     setValidating(true);
     setError("");
 

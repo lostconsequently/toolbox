@@ -380,7 +380,7 @@ export default function SignInAnomalyAnalyzerForm({ compactMode = false }) {
             >
               {visibleTimeline.map((event, index) => (
                 <div
-                  key={index}
+                  key={`${index}-${event.timestampRaw || event.user}`}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "auto 1fr auto",

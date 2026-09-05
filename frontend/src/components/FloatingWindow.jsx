@@ -1,31 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Minus, Maximize2, Minimize2, X, Pin } from "lucide-react";
 
 import { useSettings } from "../context/SettingsContext";
 import { useModalA11y } from "../hooks/useModalA11y";
 import { useLanguage } from "../context/LanguageContext";
-import { actionColors } from "../core/tokens";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { actionColors, MOBILE_BREAKPOINT_QUERY } from "../core/tokens";
 
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 260;
 const TITLE_BAR_HEIGHT = 44;
-const MOBILE_BREAKPOINT = 768;
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(
-    () => window.innerWidth < MOBILE_BREAKPOINT,
-  );
-
-  useEffect(() => {
-    const handleResize = () =>
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return isMobile;
-}
 
 const controlButtonStyle = {
   background: "transparent",
@@ -60,7 +44,7 @@ export default function FloatingWindow({
   const { t } = useLanguage();
 
   const compactMode = settings?.compactMode || false;
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery(MOBILE_BREAKPOINT_QUERY);
   const fullscreen = win.maximized || isMobile;
 
   const containerRef = useModalA11y({ isOpen: isActive, onClose });

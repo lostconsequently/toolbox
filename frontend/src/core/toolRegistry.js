@@ -1,5 +1,3 @@
-import { runLinkTool } from "./toolEngines/linkEngine";
-import { runDnsTool } from "./toolEngines/dnsEngine";
 import { runMailTool } from "./toolEngines/mailEngine";
 import { runMacTool } from "./toolEngines/macEngine";
 import { runPasswordTool } from "./toolEngines/passwordEngine";
@@ -103,26 +101,6 @@ function defineToolType({
 }
 
 export const toolRegistry = {
-  link: defineToolType({
-    label: "Link",
-    icon: "link",
-    engine: runLinkTool,
-    showConfigInput: true,
-    showInputTemplate: true,
-    configTitle: "URL Template",
-    configLabel: "Target URL",
-    configPlaceholder:
-      "Use {input} for the user input. For example: https://mxtoolbox.com/SuperTool.aspx?action=spf%3a{input}&run=toolpage",
-    helpTitle: "Link Tool",
-    helpText:
-      "Use this type to open external websites or online tools. The value the user enters can be placed into the URL with {input}.",
-    shortDescription:
-      "Open an external website or online tool, with the user's input inserted into the URL.",
-    marketplaceCategory: "utilities",
-    addedAt: "2026-07-05",
-    defaultCategoryHint: "Utilities",
-  }),
-
   secretGenerator: defineToolType({
     label: "Secret Generator",
     icon: "keyRound",

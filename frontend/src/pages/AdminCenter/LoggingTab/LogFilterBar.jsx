@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 
+import ActionButton from "../../../components/toolForms/shared/ActionButton";
 import FormField from "../../../components/toolForms/shared/FormField";
 import LevelBadge from "../../../components/shared/LevelBadge";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -90,25 +91,17 @@ export default function LogFilterBar({ filters, onChange, compactMode }) {
               filters.category.includes(category);
 
             return (
-              <button
+              <ActionButton
                 key={category}
-                type="button"
+                variant="chip"
+                active={active}
+                compactMode={compactMode}
                 onClick={() =>
                   update({ category: toggleValue(filters.category, category) })
                 }
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "999px",
-                  border: `1px solid ${active ? "var(--primary)" : "var(--border)"}`,
-                  background: active ? "var(--overlay)" : "transparent",
-                  color: active ? "var(--primary)" : "var(--subtle)",
-                  fontSize: compactMode ? "11px" : "12px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
               >
                 {t(`adminCenter.logging.category.${category}`)}
-              </button>
+              </ActionButton>
             );
           })}
         </div>

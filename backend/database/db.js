@@ -86,6 +86,8 @@ function initializeDatabase() {
   })
     .then(() => ensureColumns("tools", TOOLS_ADDED_COLUMNS))
     .then(() => ensureColumns("users", USERS_ADDED_COLUMNS))
+    .then(() => ensureColumns("backup_config", BACKUP_CONFIG_ADDED_COLUMNS))
+    .then(() => ensureColumns("setup_status", SETUP_STATUS_ADDED_COLUMNS))
     .then(() =>
       execSql(
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL",
@@ -109,6 +111,23 @@ const TOOLS_ADDED_COLUMNS = [
 const USERS_ADDED_COLUMNS = [
   { name: "username", ddl: "TEXT" },
   { name: "last_login_at", ddl: "TEXT" },
+];
+
+// Lets the automatic backup schedule survive a process restart without
+// resetting its clock, and gives the Backup tab something to show besides
+// the raw interval setting.
+const BACKUP_CONFIG_ADDED_COLUMNS = [
+  { name: "last_run_at", ddl: "TEXT" },
+  { name: "last_run_status", ddl: "TEXT" },
+];
+
+// Org-wide time display preferences, added after setup_status originally
+// shipped with just language/timezone/theme.
+const SETUP_STATUS_ADDED_COLUMNS = [
+  { name: "time_format", ddl: "TEXT" },
+  { name: "time_offset_minutes", ddl: "INTEGER NOT NULL DEFAULT 0" },
+  { name: "time_mode", ddl: "TEXT NOT NULL DEFAULT 'auto'" },
+  { name: "font_family", ddl: "TEXT" },
 ];
 
 // Unlike ADD COLUMN above, a CHECK constraint can't be altered in place in

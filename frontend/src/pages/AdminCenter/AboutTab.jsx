@@ -2,19 +2,20 @@ import { useEffect, useState } from "react";
 import {
   BookOpen,
   ExternalLink,
-  FolderGit,
   Info,
   LifeBuoy,
   Server,
   Tag,
 } from "lucide-react";
 
+import Card from "../../components/shared/Card";
 import { useAdmin } from "../../context/AdminContext";
 import { useBranding } from "../../context/BrandingContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSettings } from "../../context/SettingsContext";
 import { api } from "../../services/api";
 import { APP_LINKS, APP_VERSION, RELEASE_NAME } from "../../config/appInfo";
+import { cardPadding } from "../../core/tokens";
 
 function formatBytes(bytes) {
   if (bytes === null || bytes === undefined) return null;
@@ -31,16 +32,32 @@ function formatBytes(bytes) {
   return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
+// Lucide dropped brand/logo icons, so the GitHub mark is inlined here
+// instead - path is GitHub's own "mark-github" octicon.
+function GithubMark({ size = 14 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M8 0c-4.42 0-8 3.58-8 8a8.013 8.013 0 0 0 5.47 7.59c.4.08.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+    </svg>
+  );
+}
+
 const LINK_ICONS = {
   documentation: BookOpen,
-  repository: FolderGit,
+  repository: GithubMark,
   releaseNotes: Tag,
   support: LifeBuoy,
 };
 
-export default function AboutTab() {
+export default function AboutTab({ setNotice }) {
   const { isAdmin } = useAdmin();
-  const { appName, tagline, companyName, logoUrl } = useBranding();
+  const { appName, companyName } = useBranding();
   const { t } = useLanguage();
   const { settings } = useSettings();
 
@@ -60,19 +77,26 @@ export default function AboutTab() {
       .then((info) => {
         if (!ignore) setSystemInfo(info);
       })
-      .catch(console.error);
+      .catch((err) => {
+        if (ignore) return;
+
+        console.error(err);
+
+        setNotice?.({
+          status: "error",
+          message: err.message || t("adminCenter.about.loadFailed"),
+        });
+      });
 
     return () => {
       ignore = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   const cardStyle = {
-    background: "var(--card)",
-    padding: compactMode ? "14px" : "20px",
-    borderRadius: "12px",
-    marginBottom: compactMode ? "14px" : "20px",
-    border: "1px solid var(--border)",
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
   };
 
   const infoRows = [
@@ -101,33 +125,7 @@ export default function AboutTab() {
 
   return (
     <div style={{ opacity: isAdmin ? 1 : 0.6 }}>
-      <div style={cardStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <img
-            src={logoUrl || "/favicon.svg"}
-            alt=""
-            style={{ width: "48px", height: "48px", objectFit: "contain" }}
-          />
-
-          <div>
-            <h2 style={{ margin: 0 }}>{appName}</h2>
-
-            {tagline && (
-              <div
-                style={{
-                  color: "var(--subtle)",
-                  fontSize: "13px",
-                  marginTop: "2px",
-                }}
-              >
-                {tagline}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div style={cardStyle}>
+      <Card style={cardStyle} hoverLift={false}>
         <div
           style={{
             display: "flex",
@@ -153,9 +151,9 @@ export default function AboutTab() {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
-      <div style={cardStyle}>
+      <Card style={cardStyle} hoverLift={false}>
         <div
           style={{
             display: "flex",
@@ -202,9 +200,9 @@ export default function AboutTab() {
             })}
           </div>
         )}
-      </div>
+      </Card>
 
-      <div style={cardStyle}>
+      <Card style={cardStyle} hoverLift={false}>
         <h3 style={{ marginTop: 0, marginBottom: "12px" }}>
           {t("adminCenter.about.creditsHeading")}
         </h3>
@@ -223,7 +221,7 @@ export default function AboutTab() {
 
           <div>{t("adminCenter.about.acknowledgements")}</div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -100,7 +100,7 @@ export default function AdminCenter() {
         </div>
       )}
 
-      {activeTab === "general" && <GeneralTab />}
+      {activeTab === "general" && <GeneralTab setNotice={setNotice} />}
 
       {activeTab === "authentication" && (
         <AuthenticationTab confirm={confirm} setNotice={setNotice} />
@@ -118,7 +118,7 @@ export default function AdminCenter() {
         <LoggingTab confirm={confirm} setNotice={setNotice} />
       )}
 
-      {activeTab === "about" && <AboutTab />}
+      {activeTab === "about" && <AboutTab setNotice={setNotice} />}
     </div>
   );
 }

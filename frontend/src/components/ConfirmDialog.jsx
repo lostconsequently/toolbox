@@ -2,6 +2,7 @@ import { useModalA11y } from "../hooks/useModalA11y";
 import { useLanguage } from "../context/LanguageContext";
 import ActionButton from "./toolForms/shared/ActionButton";
 import ActionRow from "./toolForms/shared/ActionRow";
+import { modal } from "../core/tokens";
 
 export default function ConfirmDialog({
   open,
@@ -29,11 +30,11 @@ export default function ConfirmDialog({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0, 0, 0, 0.6)",
+        background: modal.scrim,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 10001,
+        zIndex: modal.zIndex,
       }}
       onClick={onCancel}
     >
@@ -47,7 +48,7 @@ export default function ConfirmDialog({
         style={{
           background: "var(--card)",
           border: "1px solid var(--border)",
-          borderRadius: "14px",
+          borderRadius: modal.panelRadius,
           padding: "20px",
           width: "100%",
           maxWidth: "420px",

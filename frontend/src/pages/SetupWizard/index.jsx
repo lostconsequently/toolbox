@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { useLanguage } from "../../context/LanguageContext";
+import { api } from "../../services/api";
 
 import WelcomeStep from "./WelcomeStep";
 import MethodStep from "./MethodStep";
@@ -25,6 +26,7 @@ export default function SetupWizard() {
     language: "en",
     timezone: "UTC",
     theme: "dark",
+    timeFormat: "24h",
   });
 
   const patchState = (patch) =>
@@ -32,6 +34,25 @@ export default function SetupWizard() {
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const goBack = () => setStep((s) => Math.max(1, s - 1));
+
+  // Offered from the Configure step when a restore keeps failing even after
+  // "Try again" - releases the prepared upload server-side and sends the
+  // admin back to Method to pick a different file or a different path
+  // entirely, rather than leaving them stuck retrying the same restore.
+  const restartFromMethod = () => {
+    if (wizardState.restoreToken) {
+      api.cancelSetupRestore(wizardState.restoreToken).catch(() => {});
+    }
+
+    patchState({
+      method: null,
+      seedOption: null,
+      restoreToken: null,
+      restoreInfo: null,
+    });
+
+    setStep(2);
+  };
 
   const stepLabels = [
     t("setupWizard.stepWelcome"),
@@ -153,7 +174,11 @@ export default function SetupWizard() {
         )}
 
         {step === 5 && (
-          <ConfigureStep wizardState={wizardState} onDone={goNext} />
+          <ConfigureStep
+            wizardState={wizardState}
+            onDone={goNext}
+            onRestart={restartFromMethod}
+          />
         )}
 
         {step === 6 && <DoneStep wizardState={wizardState} />}

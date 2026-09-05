@@ -157,6 +157,7 @@ export default {
     favorite: "Favori",
     featured: "Öne çıkan",
     browseToolsCenter: "Araç Merkezi'ne git",
+    runCardAria: "{name} çalıştır",
   },
 
   toolForm: {
@@ -265,6 +266,9 @@ export default {
 
   settings: {
     title: "Ayarlar",
+    personalScope: "Kişisel",
+    orgDefaultNote:
+      "Bunlar bu tarayıcı için kişisel tercihlerinizdir. Bir yönetici, Yönetim Merkezi → Genel bölümünde kuruluş genelinde varsayılanlar da ayarlayabilir — bunlar yalnızca burada henüz bir tercih seçilmemiş tarayıcılar için geçerlidir.",
     interfaceHeading: "Arayüz",
     selectTheme: "Tema Seçin",
     selectFont: "Yazı Tipi Seçin",
@@ -303,6 +307,14 @@ export default {
       "Toolbox'ın ne sıklıkla otomatik yedek aldığı ve en eskisi silinmeden önce kaç tanesinin saklandığı.",
     backupSettingsSaveSuccess: "Yedekleme zamanlaması kaydedildi.",
     backupSettingsSaveFailed: "Yedekleme zamanlaması kaydedilemedi.",
+    backupLastRun: "Son çalışma",
+    backupLastRunNever: "Henüz hiç",
+    backupNextRun: "Sonraki çalışma",
+    backupRunStatus: {
+      created: "yedek oluşturuldu",
+      skipped: "atlandı, veritabanı meşguldü",
+      failed: "başarısız",
+    },
     automaticBackups: "Otomatik Yedekler",
     backupsStored: "{count} / {max} yedek kaydedildi",
     noAutomaticBackups: "Henüz otomatik yedek bulunamadı",
@@ -355,6 +367,8 @@ export default {
     download: "İndir",
     edit: "Düzenle",
     delete: "Sil",
+    viewCardAria: "{name} görüntüle",
+    moreActions: "{name} için diğer eylemler",
     deleteConfirmTitle: "Betiği sil",
     deleteConfirmMessage:
       "Bu betik silinsin mi? Şablon alanları da kaldırılacak.",
@@ -435,13 +449,36 @@ export default {
     tabAbout: "Hakkında",
     generalHeading: "Genel yönetici ayarları",
     generalDescription:
-      "Yönetici ayarları burada yer alacak. Yedekleme ve geri yükleme Yedekleme sekmesindedir.",
+      "Dil, saat dilimi ve tema için kuruluş genelinde varsayılanlar. Bunlar yalnızca henüz kendi tercihini belirlememiş bir tarayıcı için geçerlidir.",
     contentOverview: "Toolbox içeriği",
+    general: {
+      orgScope: "Kuruluş",
+      save: "Varsayılanları kaydet",
+      saveSuccess: "Kuruluş varsayılanları kaydedildi.",
+      saveFailed: "Kuruluş varsayılanları kaydedilemedi.",
+      loadFailed: "Mevcut kuruluş varsayılanları yüklenemedi.",
+      localizationHeading: "Dil & tema",
+      fontLabel: "Yazı Tipi",
+      timeHeading: "Saat",
+      timeFormatLabel: "Saat biçimi",
+      timeFormat24h: "24 saat",
+      timeFormat12h: "12 saat (ÖÖ/ÖS)",
+      timeModeLabel: "Saat kaynağı",
+      timeModeAuto: "Otomatik",
+      timeModeManual: "Manuel",
+      timeModeAutoHint: "Sunucunun kendi sistem saatini takip eder.",
+      timeModeManualHint:
+        "Şu an saatin ne olması gerektiğini belirleyin - Otomatik'e geri dönene kadar uygulama genelinde gösterilen her saat bu farka göre kaydırılır.",
+      timeManualLabel: "Güncel tarih & saati ayarla",
+      timeManualHint:
+        "Gerçek saate göre bir fark ayarlar - Otomatik'e geri dönene kadar uygulama genelinde gösterilen her saat bu farka göre kaydırılır.",
+      timeManualInvalid: "Geçerli bir tarih ve saat girin.",
+    },
     authentication: {
       heading: "Kimlik Doğrulama",
       description:
         "Toolbox kullanılmadan önce isteğe bağlı olarak giriş yapılmasını zorunlu kılın. Varsayılan olarak devre dışıdır - mevcut yönetici erişimi bundan etkilenmez.",
-      modeLabel: "Mod",
+      modeLabel: "Kimlik doğrulama modu",
       modeDisabled: "Devre dışı",
       modeDisabledHint: "Herkes giriş yapmadan Toolbox'ı açabilir.",
       modeLocal: "Yerel parola",
@@ -450,12 +487,18 @@ export default {
       modeLocalUsers: "Yerel kullanıcılar",
       modeLocalUsersHint:
         "Aşağıdaki Yerel Kullanıcılar listesinden bir kullanıcı adı ve parola zorunlu kılın.",
+      modeLocalUsersBetaNote:
+        "Beta: kullanıcı başına roller ve denetim günlüğü yenidir ve henüz büyük ölçekte üretimde kullanılmamıştır. Ekibinize açmadan önce yedek bir hesapla test edin.",
       modeEntra: "Microsoft Entra ID (SSO)",
       modeEntraHint:
         "Microsoft ile girişi zorunlu kılar - yerel parola seçeneği yoktur.",
+      modeEntraBetaNote:
+        "Beta: grup/kullanıcı izin listesi eşleştirmesi yenidir. Diğer giriş seçeneklerini kaldırmadan önce bir test kullanıcısı için girişin çalıştığını doğrulayın.",
       modeHybrid: "Hibrit (Yerel + Entra ID)",
       modeHybridHint:
         "Hem Microsoft ile girişe hem de yerel parolaya izin verir.",
+      modeHybridBetaNote:
+        "Beta: yukarıdaki Yerel kullanıcılar ve Entra ID beta özelliklerini birleştirir - etkinleştirmeden önce her iki notu da inceleyin.",
       comingSoon: "Yakında",
       sessionTimeoutLabel: "Oturum zaman aşımı (dakika)",
       sessionTimeoutHint:
@@ -471,12 +514,13 @@ export default {
       saving: "Kaydediliyor...",
       saveSuccess: "Kimlik doğrulama ayarları kaydedildi.",
       saveFailed: "Kimlik doğrulama ayarları kaydedilemedi.",
+      loadFailed: "Kimlik doğrulama ayarları yüklenemedi.",
       recoveryKeyLabel: "Kurtarma anahtarı",
       recoveryKeyConfigured: "Yapılandırıldı",
       recoveryKeyMissing: "Yapılandırılmadı",
       recoveryKeyHeading: "Kurtarma anahtarı",
       recoveryKeyDescription:
-        "Bir kurtarma anahtarı, yerel parola kaybolursa sıfırlamayı sağlar. Yeni bir anahtar oluşturmak öncekini hemen geçersiz kılar - aynı anda yalnızca biri çalışır.",
+        "Bir kurtarma anahtarı, yerel yönetici parolası kaybolursa sıfırlamayı sağlar. Yeni bir anahtar oluşturmak öncekini hemen geçersiz kılar - aynı anda yalnızca biri çalışır. Bu yalnızca tekil yerel yönetici hesabını kapsar - bir Local Users hesabını veya Entra ID oturum açmayı sıfırlayamaz.",
       recoveryKeyGenerate: "Yeni kurtarma anahtarı oluştur",
       recoveryKeyGenerating: "Oluşturuluyor...",
       recoveryKeyConfirm:
@@ -489,8 +533,14 @@ export default {
       entraEncryptionKeyMissing:
         "Sunucuda AUTH_ENCRYPTION_KEY ayarlı değil, bu yüzden istemci sırrı henüz kaydedilemiyor. Backend'in .env dosyasında ayarlayıp sunucuyu yeniden başlatın.",
       entraTenantIdLabel: "Tenant ID",
+      entraTenantIdHint:
+        "Entra yönetim merkezinde uygulama kaydının Overview sayfasında bulunur - Directory (tenant) ID olarak da adlandırılır.",
       entraClientIdLabel: "Client ID",
+      entraClientIdHint:
+        "Tenant ID ile aynı Overview sayfasında bulunur - Application (client) ID olarak da adlandırılır.",
       entraClientSecretLabel: "Client Secret",
+      entraClientSecretHint:
+        "Uygulama kaydının 'Certificates & secrets' sayfasında oluşturulur. Yalnızca oluşturma anında gösterilen değer burada çalışır - daha sonra tekrar alınamaz.",
       entraClientSecretPlaceholder: "İstemci sırrını girin",
       entraClientSecretKeepPlaceholder: "Mevcut sırrı korumak için boş bırakın",
       entraClientSecretConfigured: "Şu anda kayıtlı bir istemci sırrı var.",
@@ -510,6 +560,7 @@ export default {
     },
     localUsers: {
       heading: "Yerel Kullanıcılar",
+      loadFailed: "Yerel kullanıcı listesi yüklenemedi.",
       description:
         "Kullanıcı adı ve parolayla giriş yapabilecek hesapları yönetin. Entra ID hesapları da en az bir kez giriş yaptıktan sonra burada görünür.",
       addUser: "Kullanıcı ekle",
@@ -551,6 +602,75 @@ export default {
       actionFailed: "Bu işlem başarısız oldu.",
       empty: "Henüz kullanıcı yok.",
     },
+    backup: {
+      heading: "Veri Yönetimi ve Yedekleme",
+      manualBackupHeading: "Manuel yedekleme",
+      downloadDatabase: "Veritabanını İndir",
+      downloadDatabaseTitle: "Veritabanı yedeğini indir",
+      restoreDatabase: "Veritabanını Geri Yükle",
+      restoreDatabaseTitle: "Yedeği geri yükle",
+      backupCenter: "Veritabanı Yedekleme Merkezi",
+      lastBackup: "Son yedek:",
+      never: "Hiç",
+      backupAvailable: "Veritabanı yedeği mevcut",
+      noBackupYet: "Henüz veritabanı yedeği yok",
+      backupStatusLabel: "Durum",
+      backupScheduleHeading: "Otomatik yedekleme zamanlaması",
+      backupIntervalLabel: "Yedekleme aralığı (saat)",
+      backupIntervalHint: "Toolbox'ın ne sıklıkla otomatik yedek aldığı.",
+      maxBackupsLabel: "Saklanacak maksimum yedek sayısı",
+      maxBackupsHint:
+        "En eskisi silinmeden önce kaç otomatik yedeğin saklanacağı.",
+      backupScheduleHint:
+        "Toolbox'ın ne sıklıkla otomatik yedek aldığı ve en eskisi silinmeden önce kaç tanesinin saklandığı.",
+      scheduleSaveSuccess: "Yedekleme zamanlaması kaydedildi.",
+      scheduleSaveFailed: "Yedekleme zamanlaması kaydedilemedi.",
+      loadBackupsFailed: "Yedek listesi yüklenemedi.",
+      loadScheduleFailed: "Yedekleme zamanlaması yüklenemedi.",
+      backupLastRun: "Son çalışma",
+      backupLastRunNever: "Henüz hiç",
+      backupNextRun: "Sonraki çalışma",
+      backupRunStatus: {
+        created: "yedek oluşturuldu",
+        skipped: "atlandı, veritabanı meşguldü",
+        failed: "başarısız",
+      },
+      automaticBackups: "Otomatik Yedekler",
+      backupsStored: "{count} / {max} yedek kaydedildi",
+      moreActions: "{name} için daha fazla işlem",
+      noAutomaticBackups: "Henüz otomatik yedek bulunamadı",
+      downloadFailed: "Veritabanı indirme başarısız oldu.",
+      restoreConfirm: "Mevcut veritabanının üzerine yazılacak. Devam edilsin mi?",
+      restoreConfirmStep2:
+        "Emin misiniz? Bu geri alınamaz - yüklenen dosya oluşturulduğundan beri eklenen tüm veriler kaybolacak.",
+      restoreSuccess:
+        "Veritabanı başarıyla geri yüklendi. Toolbox şimdi yeniden yüklenecek.",
+      restoreFailed: "Geri yükleme başarısız oldu.",
+      backupTypeAutomatic: "Otomatik",
+      backupTypeSafety: "Güvenlik yedeği",
+      backupTypeUnknown: "Bilinmiyor",
+      downloadBackup: "İndir",
+      downloadBackupTitle: "Bu yedeği indir",
+      downloadBackupFailed: "Yedek indirme başarısız oldu.",
+      restoreBackup: "Geri yükle",
+      restoreBackupTitle: "Bu yedeği geri yükle",
+      restoreBackupInProgress: "Geri yükleniyor...",
+      restoreBackupStep1Warning:
+        "Bir yedeği geri yüklemek mevcut veritabanının üzerine yazar. Bu yedekten sonra yapılan tüm değişiklikler kaybolur.",
+      restoreBackupPrepareFailed:
+        "Güvenlik yedeği oluşturulamadı. Geri yükleme iptal edildi.",
+      safetyBackupDownloadFailed:
+        "Güvenlik yedeği indirilemedi, ancak devam edilmeden önce sunucuda oluşturuldu.",
+      restoreBackupStep3Confirm:
+        "Önce mevcut durumun güvenlik yedeği oluşturuldu ({file}). Seçilen yedeği geri yüklemek istediğinizden emin misiniz?",
+      restoreCancelFailed:
+        "Geri yükleme oturumu sunucuda iptal edilemedi - kısa süre içinde kendiliğinden sona erecek.",
+      restoreBackupSuccessDetail:
+        "Yedek başarıyla geri yüklendi: {file} ({time}).",
+      restoreBackupFailedRolledBack:
+        "Geri yükleme başarısız oldu. Veritabanı otomatik olarak önceki durumuna geri döndürüldü.",
+      refreshPrompt: "Değişiklikleri görmek için sayfayı şimdi yenile?",
+    },
     branding: {
       heading: "Marka Kimliği",
       description:
@@ -583,7 +703,11 @@ export default {
       imageRemoveFailed: "Görsel kaldırılamadı.",
       themeHeading: "Tema renkleri",
       primaryColorLabel: "Ana renk",
+      primaryColorHint:
+        "Uygulama genelinde düğmeler, bağlantılar ve giriş düğmesi için kullanılır.",
       accentColorLabel: "Vurgu rengi",
+      accentColorHint:
+        "Yalnızca aktif kenar çubuğu öğesinin vurgu çubuğu için, sınırlı şekilde kullanılır.",
       invalidColor: "Renkler #3b82f6 gibi bir hex değeri olmalıdır.",
       loginHeading: "Giriş sayfası",
       loginTitleLabel: "Giriş başlığı",
@@ -608,6 +732,7 @@ export default {
       previewLogin: "Giriş ekranı",
     },
     about: {
+      loadFailed: "Sistem bilgileri yüklenemedi.",
       applicationInfo: "Uygulama bilgileri",
       version: "Sürüm",
       release: "Sürüm adı",
@@ -672,11 +797,13 @@ export default {
       retentionSystemLabel: "Sistem günlüğü saklama süresi (gün)",
       retentionErrorLabel: "Hata günlüğü saklama süresi (gün)",
       retentionSecurityLabel: "Denetim/güvenlik günlüğü saklama süresi (gün)",
+      retentionDaysHint: "0 gün, kayıtları süresiz saklar.",
       retentionMaxRowsLabel: "Saklanacak maksimum günlük kaydı sayısı",
       retentionHint:
-        "0 gün, kayıtları süresiz saklar. Maksimum kayıt sayısı, yaşından bağımsız olarak bir güvenlik sınırı olarak her zaman uygulanır.",
+        "Yukarıdaki saklama ayarlarından bağımsız olarak, yaşından bağımsız bir güvenlik sınırı olarak her zaman uygulanır.",
       retentionSaved: "Saklama ayarları kaydedildi.",
       retentionSaveFailed: "Saklama ayarları kaydedilemedi.",
+      retentionLoadFailed: "Saklama ayarları yüklenemedi.",
       purgeHeading: "Günlükleri temizle",
       purgeScopeLabel: "Kapsam",
       purgeScope: {
@@ -959,6 +1086,62 @@ export default {
     close: "Pencereyi kapat",
   },
 
+  codeCompare: {
+    title: "Kod Karşılaştırma",
+    description:
+      "İki metin veya kod parçasını yan yana karşılaştırın. Her şey tarayıcınızda yerel olarak çalışır - sunucuya hiçbir şey gönderilmez.",
+    originalLabel: "Orijinal",
+    modifiedLabel: "Değiştirilmiş",
+    originalPlaceholder:
+      "Orijinal metni veya kodu buraya yapıştırın ya da yazın",
+    modifiedPlaceholder:
+      "Değiştirilmiş metni veya kodu buraya yapıştırın ya da yazın",
+    originalAriaLabel: "Orijinal metin",
+    modifiedAriaLabel: "Değiştirilmiş metin",
+    lineNumbersAriaLabel: "Satır numaraları",
+    languageLabel: "Dil",
+    languages: {
+      plaintext: "Düz Metin",
+      json: "JSON",
+      javascript: "JavaScript",
+      typescript: "TypeScript",
+      powershell: "PowerShell",
+      html: "HTML",
+      css: "CSS",
+      sql: "SQL",
+      xml: "XML",
+      yaml: "YAML",
+    },
+    viewModeLabel: "Görünüm",
+    viewModeSideBySide: "Yan yana",
+    viewModeInline: "Satır içi",
+    optionsTitle: "Seçenekler",
+    ignoreWhitespace: "Boşlukları yoksay",
+    ignoreCase: "Büyük/küçük harfi yoksay",
+    ignoreEmptyLines: "Boş satırları yoksay",
+    actionCompare: "Karşılaştır",
+    actionSwap: "Tarafları değiştir",
+    actionSwapTitle: "Orijinal ve değiştirilmiş metni yer değiştir",
+    actionClear: "Temizle",
+    actionClearTitle: "Her iki düzenleyiciyi de temizle",
+    actionCopyResult: "Sonucu kopyala",
+    copiedResult: "Sonuç kopyalandı",
+    copyFailed: "Kopyalama başarısız oldu",
+    resultTitle: "Farklar",
+    legendAdded: "Eklendi",
+    legendRemoved: "Kaldırıldı",
+    legendChanged: "Değiştirildi",
+    statusEmpty: "Farkları görmek için her iki düzenleyiciye de metin girin.",
+    statusIdentical: "Fark bulunamadı.",
+    statusDifferences:
+      "{count} fark bulundu: {added} eklendi, {removed} kaldırıldı, {changed} değiştirildi.",
+    statusTooLarge:
+      "Bu metinler satır satır karşılaştırmak için çok büyük veya çok farklı. Daha küçük bir seçim deneyin.",
+    statusError: "Bu girdiler karşılaştırılırken bir şeyler ters gitti.",
+    largeInputWarning:
+      "Girdi büyük - otomatik karşılaştırma duraklatıldı. Çalıştırmak için Karşılaştır'a tıklayın.",
+  },
+
   setupWizard: {
     stepWelcome: "Hoş geldiniz",
     stepMethod: "Kurulum yöntemi",
@@ -1027,6 +1210,7 @@ export default {
     configureStepFinishing: "Tamamlanıyor...",
     configureFailed: "Kurulum tamamlanamadı.",
     tryAgain: "Tekrar dene",
+    startOver: "Baştan başla",
 
     doneTitle: "Toolbox hazır",
     doneDescription: "Kurulum başarıyla tamamlandı.",

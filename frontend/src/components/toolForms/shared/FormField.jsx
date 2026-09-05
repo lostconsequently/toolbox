@@ -1,5 +1,9 @@
+import InfoTooltip from "../../shared/InfoTooltip";
+import "../../../styles/hoverCard.css";
+
 export default function FormField({
   label,
+  hint,
   value,
   onChange,
   placeholder = "",
@@ -9,6 +13,11 @@ export default function FormField({
   textarea = false,
   rows = 4,
   disabled = false,
+  // Applied to the wrapper div (not the input/textarea itself, which
+  // `...rest`'s own `className` already targets - e.g. "no-spinner") so a
+  // caller can opt into the SubCategoryCard-style hover lift without
+  // clashing with that separate mechanism.
+  wrapperClassName = "",
   ...rest
 }) {
   const baseStyle = {
@@ -25,11 +34,13 @@ export default function FormField({
   };
 
   return (
-    <div>
+    <div className={wrapperClassName}>
       {label && (
         <label
           style={{
-            display: "block",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
             marginBottom: "6px",
             color: "var(--subtle)",
             fontSize: "12px",
@@ -37,6 +48,7 @@ export default function FormField({
           }}
         >
           {label}
+          {hint && <InfoTooltip text={hint} />}
         </label>
       )}
 

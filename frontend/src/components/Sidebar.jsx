@@ -15,12 +15,10 @@ import { useBranding } from "../context/BrandingContext";
 import { useSettings } from "../context/SettingsContext";
 import { useLanguage } from "../context/LanguageContext";
 import { APP_VERSION } from "../config/appInfo";
-import { TASKBAR_HEIGHT } from "../core/tokens";
+import { MOBILE_BREAKPOINT_QUERY, TASKBAR_HEIGHT } from "../core/tokens";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useModalA11y } from "../hooks/useModalA11y";
 import "../styles/hoverCard.css";
-
-const MOBILE_DRAWER_BREAKPOINT = "(max-width: 640px)";
 
 export default function Sidebar({ mobileOpen = false, onCloseMobile }) {
   const { settings } = useSettings();
@@ -31,7 +29,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }) {
   const isRestrictedUser = isAuthRequired && user?.role === "user";
 
   const isNarrowViewport = useMediaQuery("(max-width: 900px)");
-  const isMobileViewport = useMediaQuery(MOBILE_DRAWER_BREAKPOINT);
+  const isMobileViewport = useMediaQuery(MOBILE_BREAKPOINT_QUERY);
   const compactMode =
     (settings?.compactMode || isNarrowViewport) && !isMobileViewport;
 
@@ -61,15 +59,26 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }) {
       path: "/script-library",
       icon: FileCode,
     },
+    // Categories and Subcategories are two views of one hierarchy (every
+    // subcategory belongs to a category) - grouped tightly together with
+    // their own reduced gap so that relationship reads visually, instead of
+    // sitting as two unrelated flat items at the same level as everything
+    // else in this section.
     !isRestrictedUser && {
-      name: t("nav.categories"),
-      path: "/categories",
-      icon: FolderTree,
-    },
-    !isRestrictedUser && {
-      name: t("nav.subcategories"),
-      path: "/subcategories",
-      icon: Folder,
+      group: true,
+      key: "taxonomy",
+      children: [
+        {
+          name: t("nav.categories"),
+          path: "/categories",
+          icon: FolderTree,
+        },
+        {
+          name: t("nav.subcategories"),
+          path: "/subcategories",
+          icon: Folder,
+        },
+      ],
     },
     {
       name: t("nav.settings"),
@@ -94,6 +103,25 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }) {
       ];
 
   const renderNavItem = (item) => {
+    if (item.group) {
+      return (
+        <div
+          key={item.key}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: compactMode ? "2px" : "3px",
+          }}
+        >
+          {item.children.map(renderNavLink)}
+        </div>
+      );
+    }
+
+    return renderNavLink(item);
+  };
+
+  const renderNavLink = (item) => {
     const Icon = item.icon;
 
     return (
@@ -119,7 +147,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }) {
 
           color: "var(--text)",
 
-          boxShadow: isActive ? "inset 3px 0 0 var(--primary)" : "none",
+          boxShadow: isActive ? "inset 3px 0 0 var(--accent)" : "none",
         })}
       >
         <Icon size={compactMode ? 18 : 20} />

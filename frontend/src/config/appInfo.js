@@ -4,7 +4,7 @@ export const RELEASE_NAME = null;
 
 export const APP_LINKS = {
   documentation: null,
-  repository: null,
+  repository: "https://github.com/lostconsequently/toolbox",
   releaseNotes: null,
   support: null,
 };

@@ -5,24 +5,20 @@ import ActionButton from "../../components/toolForms/shared/ActionButton";
 import FormField from "../../components/toolForms/shared/FormField";
 import StatusMessage from "../../components/toolForms/shared/StatusMessage";
 import Badge from "../../components/shared/Badge";
+import Card from "../../components/shared/Card";
 import LocalUsersSection from "./LocalUsersSection";
 import { useAdmin } from "../../context/AdminContext";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSettings } from "../../context/SettingsContext";
 import { api } from "../../services/api";
+import { cardPadding, stackedFieldMaxWidth } from "../../core/tokens";
 
 function splitList(text) {
   return text
     .split(/[\n,]+/)
     .map((entry) => entry.trim())
     .filter(Boolean);
-}
-
-function modeLabelKey(mode) {
-  const camel = mode.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-
-  return `adminCenter.authentication.mode${camel.charAt(0).toUpperCase()}${camel.slice(1)}`;
 }
 
 export default function AuthenticationTab({ confirm, setNotice }) {
@@ -37,6 +33,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
   const [authMode, setAuthMode] = useState("disabled");
   const [authTimeout, setAuthTimeout] = useState(480);
   const [authSaving, setAuthSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [generatingRecoveryKey, setGeneratingRecoveryKey] = useState(false);
   const [revealedRecoveryKey, setRevealedRecoveryKey] = useState(null);
 
@@ -55,6 +52,8 @@ export default function AuthenticationTab({ confirm, setNotice }) {
 
     let ignore = false;
 
+    setLoading(true);
+
     api
       .getAuthConfig()
       .then((config) => {
@@ -68,11 +67,24 @@ export default function AuthenticationTab({ confirm, setNotice }) {
         setEntraAllowedUsers((config.entraAllowedUsers || []).join("\n"));
         setEntraAllowedGroups((config.entraAllowedGroups || []).join("\n"));
       })
-      .catch(console.error);
+      .catch((err) => {
+        if (ignore) return;
+
+        console.error(err);
+
+        setNotice({
+          status: "error",
+          message: err.message || t("adminCenter.authentication.loadFailed"),
+        });
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
 
     return () => {
       ignore = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   const saveAuthConfig = async () => {
@@ -166,166 +178,168 @@ export default function AuthenticationTab({ confirm, setNotice }) {
     }
   };
 
+  const cardStyle = {
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
+  };
+
   return (
-    <div
-      style={{
-        background: "var(--card)",
-        padding: compactMode ? "14px" : "20px",
-        borderRadius: "12px",
-        marginBottom: compactMode ? "14px" : "20px",
-        border: "1px solid var(--border)",
-        opacity: isAdmin ? 1 : 0.6,
-      }}
-    >
-      <h2 style={{ marginTop: 0 }}>
-        {t("adminCenter.authentication.heading")}
-      </h2>
-
-      <p style={{ color: "var(--subtle)" }}>
-        {t("adminCenter.authentication.description")}
-      </p>
-
-      <div
-        style={{
-          display: "grid",
-          gap: "10px",
-          marginTop: "16px",
-          marginBottom: "20px",
-        }}
-      >
-        <label
+    <div style={{ opacity: isAdmin ? 1 : 0.6 }}>
+      <Card style={cardStyle} hoverLift={false}>
+        <div
           style={{
-            color: "var(--subtle)",
-            fontSize: "12px",
-            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "12px",
           }}
         >
-          {t("adminCenter.authentication.modeLabel")}
-        </label>
+          <KeyRound size={16} />
+          <h3 style={{ margin: 0 }}>
+            {t("adminCenter.authentication.modeLabel")}
+          </h3>
+        </div>
 
-        {[
-          {
-            value: "disabled",
-            label: t("adminCenter.authentication.modeDisabled"),
-            hint: t("adminCenter.authentication.modeDisabledHint"),
-            available: true,
-          },
-          {
-            value: "local",
-            label: t("adminCenter.authentication.modeLocal"),
-            hint: t("adminCenter.authentication.modeLocalHint"),
-            available: true,
-            beta: true,
-          },
-          {
-            value: "local_users",
-            label: t("adminCenter.authentication.modeLocalUsers"),
-            hint: t("adminCenter.authentication.modeLocalUsersHint"),
-            available: true,
-            beta: true,
-          },
-          {
-            value: "entra",
-            label: t("adminCenter.authentication.modeEntra"),
-            hint: t("adminCenter.authentication.modeEntraHint"),
-            available: true,
-            beta: true,
-          },
-          {
-            value: "hybrid",
-            label: t("adminCenter.authentication.modeHybrid"),
-            hint: t("adminCenter.authentication.modeHybridHint"),
-            available: true,
-            beta: true,
-          },
-        ].map((option) => (
-          <label
-            key={option.value}
-            htmlFor={`auth-mode-${option.value}`}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "10px",
-              padding: "12px",
-              borderRadius: "10px",
-              border: `1px solid ${authMode === option.value ? "var(--primary)" : "var(--border)"}`,
-              background: "var(--surface)",
-              cursor: option.available && isAdmin ? "pointer" : "not-allowed",
-              opacity: option.available ? 1 : 0.55,
-            }}
-          >
-            <input
-              id={`auth-mode-${option.value}`}
-              type="radio"
-              name="auth-mode"
-              value={option.value}
-              checked={authMode === option.value}
-              disabled={!option.available || !isAdmin}
-              onChange={() => setAuthMode(option.value)}
-              style={{ marginTop: "3px" }}
-            />
+        <div style={{ display: "grid", gap: "10px" }}>
+          {[
+            {
+              value: "disabled",
+              label: t("adminCenter.authentication.modeDisabled"),
+              hint: t("adminCenter.authentication.modeDisabledHint"),
+              available: true,
+            },
+            {
+              value: "local",
+              label: t("adminCenter.authentication.modeLocal"),
+              hint: t("adminCenter.authentication.modeLocalHint"),
+              available: true,
+            },
+            {
+              value: "local_users",
+              label: t("adminCenter.authentication.modeLocalUsers"),
+              hint: t("adminCenter.authentication.modeLocalUsersHint"),
+              available: true,
+              beta: true,
+              betaNote: t("adminCenter.authentication.modeLocalUsersBetaNote"),
+            },
+            {
+              value: "entra",
+              label: t("adminCenter.authentication.modeEntra"),
+              hint: t("adminCenter.authentication.modeEntraHint"),
+              available: true,
+              beta: true,
+              betaNote: t("adminCenter.authentication.modeEntraBetaNote"),
+            },
+            {
+              value: "hybrid",
+              label: t("adminCenter.authentication.modeHybrid"),
+              hint: t("adminCenter.authentication.modeHybridHint"),
+              available: true,
+              beta: true,
+              betaNote: t("adminCenter.authentication.modeHybridBetaNote"),
+            },
+          ].map((option) => (
+            <label
+              key={option.value}
+              htmlFor={`auth-mode-${option.value}`}
+              className="hover-card"
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                padding: "12px",
+                borderRadius: "10px",
+                border: `1px solid ${authMode === option.value ? "var(--primary)" : "var(--border)"}`,
+                background: "var(--card)",
+                cursor:
+                  option.available && isAdmin ? "pointer" : "not-allowed",
+                opacity: option.available ? 1 : 0.55,
+              }}
+            >
+              <input
+                id={`auth-mode-${option.value}`}
+                type="radio"
+                name="auth-mode"
+                value={option.value}
+                checked={authMode === option.value}
+                disabled={!option.available || !isAdmin || loading}
+                onChange={() => setAuthMode(option.value)}
+                style={{ marginTop: "3px" }}
+              />
 
-            <div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontWeight: "600",
-                }}
-              >
-                {option.label}
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontWeight: "600",
+                  }}
+                >
+                  {option.label}
+
+                  {option.beta && (
+                    <Badge
+                      label={t("common.beta")}
+                      color="var(--status-warning)"
+                      variant="soft"
+                      compactMode
+                      title={option.betaNote}
+                    />
+                  )}
+                </div>
+
+                <div style={{ fontSize: "12px", color: "var(--subtle)" }}>
+                  {option.hint}
+                </div>
 
                 {option.beta && (
-                  <Badge
-                    label={t("common.beta")}
-                    color="var(--status-warning)"
-                    variant="soft"
-                    compactMode
-                  />
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--status-warning)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {option.betaNote}
+                  </div>
                 )}
               </div>
-
-              <div style={{ fontSize: "12px", color: "var(--subtle)" }}>
-                {option.hint}
-              </div>
-            </div>
-          </label>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: "260px", marginBottom: "20px" }}>
-        <FormField
-          label={t("adminCenter.authentication.sessionTimeoutLabel")}
-          type="number"
-          min={5}
-          max={10080}
-          value={authTimeout}
-          onChange={setAuthTimeout}
-          disabled={!isAdmin}
-          compactMode={compactMode}
-        />
-
-        <div
-          style={{ fontSize: "12px", color: "var(--subtle)", marginTop: "6px" }}
-        >
-          {t("adminCenter.authentication.sessionTimeoutHint")}
+            </label>
+          ))}
         </div>
-      </div>
+
+        <div style={{ maxWidth: stackedFieldMaxWidth, marginTop: "16px" }}>
+          <FormField
+            label={t("adminCenter.authentication.sessionTimeoutLabel")}
+            hint={t("adminCenter.authentication.sessionTimeoutHint")}
+            type="number"
+            min={5}
+            max={10080}
+            value={authTimeout}
+            onChange={setAuthTimeout}
+            disabled={!isAdmin || loading}
+            compactMode={compactMode}
+            wrapperClassName="hover-card"
+          />
+        </div>
+      </Card>
 
       {(authMode === "entra" || authMode === "hybrid") && (
-        <div
-          style={{
-            padding: compactMode ? "12px" : "16px",
-            marginBottom: "20px",
-            background: "var(--surface)",
-            borderRadius: "10px",
-            border: "1px solid var(--border)",
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>
-            {t("adminCenter.authentication.entraHeading")}
-          </h3>
+        <Card style={cardStyle} hoverLift={false}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <PlugZap size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.authentication.entraHeading")}
+            </h3>
+          </div>
 
           {authConfig && !authConfig.encryptionKeyConfigured && (
             <div style={{ marginBottom: "14px" }}>
@@ -338,27 +352,32 @@ export default function AuthenticationTab({ confirm, setNotice }) {
           <div style={{ display: "grid", gap: "14px" }}>
             <FormField
               label={t("adminCenter.authentication.entraTenantIdLabel")}
+              hint={t("adminCenter.authentication.entraTenantIdHint")}
               value={entraTenantId}
               onChange={setEntraTenantId}
               placeholder="00000000-0000-0000-0000-000000000000"
               disabled={!isAdmin}
               mono
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
 
             <FormField
               label={t("adminCenter.authentication.entraClientIdLabel")}
+              hint={t("adminCenter.authentication.entraClientIdHint")}
               value={entraClientId}
               onChange={setEntraClientId}
               placeholder="00000000-0000-0000-0000-000000000000"
               disabled={!isAdmin}
               mono
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
 
             <div>
               <FormField
                 label={t("adminCenter.authentication.entraClientSecretLabel")}
+                hint={t("adminCenter.authentication.entraClientSecretHint")}
                 type="password"
                 value={entraClientSecret}
                 onChange={setEntraClientSecret}
@@ -374,6 +393,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
                 disabled={!isAdmin}
                 autoComplete="new-password"
                 compactMode={compactMode}
+                wrapperClassName="hover-card"
               />
 
               <div
@@ -389,53 +409,33 @@ export default function AuthenticationTab({ confirm, setNotice }) {
               </div>
             </div>
 
-            <div>
-              <FormField
-                label={t("adminCenter.authentication.entraAllowedUsersLabel")}
-                value={entraAllowedUsers}
-                onChange={setEntraAllowedUsers}
-                placeholder="user@company.com"
-                disabled={!isAdmin}
-                textarea
-                rows={3}
-                mono
-                compactMode={compactMode}
-              />
+            <FormField
+              label={t("adminCenter.authentication.entraAllowedUsersLabel")}
+              hint={t("adminCenter.authentication.entraAllowedUsersHint")}
+              value={entraAllowedUsers}
+              onChange={setEntraAllowedUsers}
+              placeholder="user@company.com"
+              disabled={!isAdmin}
+              textarea
+              rows={3}
+              mono
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
 
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--subtle)",
-                  marginTop: "6px",
-                }}
-              >
-                {t("adminCenter.authentication.entraAllowedUsersHint")}
-              </div>
-            </div>
-
-            <div>
-              <FormField
-                label={t("adminCenter.authentication.entraAllowedGroupsLabel")}
-                value={entraAllowedGroups}
-                onChange={setEntraAllowedGroups}
-                placeholder="00000000-0000-0000-0000-000000000000"
-                disabled={!isAdmin}
-                textarea
-                rows={3}
-                mono
-                compactMode={compactMode}
-              />
-
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--subtle)",
-                  marginTop: "6px",
-                }}
-              >
-                {t("adminCenter.authentication.entraAllowedGroupsHint")}
-              </div>
-            </div>
+            <FormField
+              label={t("adminCenter.authentication.entraAllowedGroupsLabel")}
+              hint={t("adminCenter.authentication.entraAllowedGroupsHint")}
+              value={entraAllowedGroups}
+              onChange={setEntraAllowedGroups}
+              placeholder="00000000-0000-0000-0000-000000000000"
+              disabled={!isAdmin}
+              textarea
+              rows={3}
+              mono
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
 
             <div>
               <ActionButton
@@ -475,10 +475,13 @@ export default function AuthenticationTab({ confirm, setNotice }) {
               )}
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {authMode === "local_users" && (
+        // No extra Card wrapper here - LocalUsersSection already renders its
+        // own complete card (icon + heading + border), so wrapping it again
+        // would just nest one card inside another.
         <LocalUsersSection
           isAdmin={isAdmin}
           confirm={confirm}
@@ -487,95 +490,22 @@ export default function AuthenticationTab({ confirm, setNotice }) {
         />
       )}
 
-      <div
-        style={{
-          padding: compactMode ? "12px" : "16px",
-          marginBottom: "20px",
-          background: "var(--surface)",
-          borderRadius: "10px",
-          border: "1px solid var(--border)",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "12px" }}>
-          {t("adminCenter.authentication.statusHeading")}
-        </h3>
-
-        <div style={{ display: "grid", gap: "8px", fontSize: "13px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "var(--subtle)" }}>
-              {t("adminCenter.authentication.currentMode")}
-            </span>
-            <strong>
-              {authConfig ? t(modeLabelKey(authConfig.mode)) : "—"}
-            </strong>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "var(--subtle)" }}>
-              {t("adminCenter.authentication.localAccountLabel")}
-            </span>
-            <strong>
-              {authConfig?.hasLocalAccount
-                ? t("adminCenter.authentication.localAccountConfigured")
-                : t("adminCenter.authentication.localAccountMissing")}
-            </strong>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "var(--subtle)" }}>
-              {t("adminCenter.authentication.activeSessions")}
-            </span>
-            <strong>{authConfig?.activeSessions ?? 0}</strong>
-          </div>
-
-          {authMode === "local_users" && (
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--subtle)" }}>
-                {t("adminCenter.authentication.localUsersCount")}
-              </span>
-              <strong>{authConfig?.localUsersCount ?? 0}</strong>
-            </div>
-          )}
-
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "var(--subtle)" }}>
-              {t("adminCenter.authentication.recoveryKeyLabel")}
-            </span>
-            <strong>
-              {authConfig?.hasRecoveryKey
-                ? t("adminCenter.authentication.recoveryKeyConfigured")
-                : t("adminCenter.authentication.recoveryKeyMissing")}
-            </strong>
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          marginTop: "24px",
-          paddingTop: "20px",
-          borderTop: "1px solid var(--border)",
-        }}
-      >
-        <h3
+      <Card style={cardStyle} hoverLift={false}>
+        <div
           style={{
-            marginTop: 0,
             display: "flex",
             alignItems: "center",
             gap: "8px",
+            marginBottom: "12px",
           }}
         >
-          {t("adminCenter.authentication.recoveryKeyHeading")}
+          <KeyRound size={16} />
+          <h3 style={{ margin: 0 }}>
+            {t("adminCenter.authentication.recoveryKeyHeading")}
+          </h3>
+        </div>
 
-          <Badge
-            label={t("common.beta")}
-            color="var(--status-warning)"
-            variant="soft"
-            compactMode
-          />
-        </h3>
-
-        <p style={{ color: "var(--subtle)", fontSize: "13px" }}>
+        <p style={{ color: "var(--subtle)", fontSize: "13px", marginTop: 0 }}>
           {t("adminCenter.authentication.recoveryKeyDescription")}
         </p>
 
@@ -585,6 +515,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
           icon={<KeyRound size={14} />}
           onClick={generateRecoveryKey}
           compactMode={compactMode}
+          className="hover-card"
         >
           {generatingRecoveryKey
             ? t("adminCenter.authentication.recoveryKeyGenerating")
@@ -597,7 +528,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
               marginTop: "16px",
               padding: "14px",
               borderRadius: "10px",
-              border: "1px solid #f59e0b",
+              border: "1px solid var(--status-warning)",
               background: "rgba(245, 158, 11, 0.08)",
             }}
           >
@@ -637,6 +568,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
               <ActionButton
                 variant="secondary"
                 compactMode
+                className="hover-card"
                 onClick={() =>
                   navigator.clipboard?.writeText(revealedRecoveryKey)
                 }
@@ -647,6 +579,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
               <ActionButton
                 variant="secondary"
                 compactMode
+                className="hover-card"
                 onClick={() => setRevealedRecoveryKey(null)}
               >
                 {t("adminCenter.authentication.recoveryKeyDismiss")}
@@ -654,7 +587,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       <div style={{ marginTop: "20px" }}>
         <ActionButton
@@ -662,6 +595,7 @@ export default function AuthenticationTab({ confirm, setNotice }) {
           variant="primary"
           onClick={saveAuthConfig}
           compactMode={compactMode}
+          className="hover-card"
         >
           {authSaving
             ? t("adminCenter.authentication.saving")

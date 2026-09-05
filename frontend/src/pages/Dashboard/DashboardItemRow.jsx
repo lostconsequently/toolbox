@@ -1,7 +1,6 @@
 import { Star } from "lucide-react";
 import Icon from "../../components/Icon";
 import Badge from "../../components/shared/Badge";
-import ActionButton from "../../components/toolForms/shared/ActionButton";
 import { FALLBACK_COLOR } from "../../core/tokens";
 import { getSearchBadgeColor } from "../../core/utils/search";
 import { useLanguage } from "../../context/LanguageContext";
@@ -20,6 +19,20 @@ export default function DashboardItemRow({
   return (
     <div
       className="hover-shift-right"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(item)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen(item);
+        }
+      }}
+      aria-label={
+        item.kind === "script"
+          ? t("common.open") + " " + item.name
+          : t("toolsPage.runCardAria", { name: item.name })
+      }
       style={{
         background: "var(--surface)",
         padding: compact ? "10px 14px" : "16px",
@@ -29,6 +42,7 @@ export default function DashboardItemRow({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        cursor: "pointer",
       }}
     >
       <div>
@@ -53,7 +67,10 @@ export default function DashboardItemRow({
           {onUnfavorite && (
             <button
               type="button"
-              onClick={() => onUnfavorite(item)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onUnfavorite(item);
+              }}
               title={t("dashboard.favorites.unfavorite")}
               aria-label={t("dashboard.favorites.unfavorite")}
               className="a11y-focus-ring"
@@ -106,10 +123,6 @@ export default function DashboardItemRow({
           </div>
         )}
       </div>
-
-      <ActionButton onClick={() => onOpen(item)}>
-        {item.kind === "script" ? t("common.open") : t("common.run")}
-      </ActionButton>
     </div>
   );
 }

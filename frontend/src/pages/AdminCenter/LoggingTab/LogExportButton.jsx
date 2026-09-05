@@ -61,6 +61,7 @@ export default function LogExportButton({ filters, compactMode, setNotice }) {
         icon={<Download size={13} />}
         disabled={Boolean(exporting)}
         onClick={() => runExport("csv")}
+        className="hover-card"
       >
         {exporting === "csv"
           ? t("common.loading")
@@ -73,6 +74,7 @@ export default function LogExportButton({ filters, compactMode, setNotice }) {
         icon={<Download size={13} />}
         disabled={Boolean(exporting)}
         onClick={() => runExport("json")}
+        className="hover-card"
       >
         {exporting === "json"
           ? t("common.loading")

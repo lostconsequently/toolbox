@@ -1,9 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "./index.css";
 import { AdminProvider } from "./context/AdminContext";
 import { AuthProvider } from "./context/AuthContext";
 import { BrandingProvider } from "./context/BrandingContext";
 import { SettingsProvider } from "./context/SettingsContext";
+import { TimeSettingsProvider } from "./context/TimeSettingsContext";
 import App from "./App";
 
 import { AppProvider } from "./context/AppContext";
@@ -20,17 +22,19 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <ThemeProvider>
           <BrandingProvider>
             <SettingsProvider>
-              <AuthProvider>
-                <AdminProvider>
-                  <AppProvider>
-                    <ScriptLibraryProvider>
-                      <ToolWindowsProvider>
-                        <App />
-                      </ToolWindowsProvider>
-                    </ScriptLibraryProvider>
-                  </AppProvider>
-                </AdminProvider>
-              </AuthProvider>
+              <TimeSettingsProvider>
+                <AuthProvider>
+                  <AdminProvider>
+                    <AppProvider>
+                      <ScriptLibraryProvider>
+                        <ToolWindowsProvider>
+                          <App />
+                        </ToolWindowsProvider>
+                      </ScriptLibraryProvider>
+                    </AppProvider>
+                  </AdminProvider>
+                </AuthProvider>
+              </TimeSettingsProvider>
             </SettingsProvider>
           </BrandingProvider>
         </ThemeProvider>

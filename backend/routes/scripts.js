@@ -147,7 +147,7 @@ function fetchScript(id) {
 async function getScriptOr404(id, req, res) {
   const script = await fetchScript(id);
 
-  if (!script || (script.isAdminOnly && !isAdminRequest(req))) {
+  if (!script || (script.isAdminOnly && !(await isAdminRequest(req)))) {
     res.status(404).json({ error: "Script not found" });
     return null;
   }
@@ -158,7 +158,7 @@ async function getScriptOr404(id, req, res) {
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const isAdmin = isAdminRequest(req);
+    const isAdmin = await isAdminRequest(req);
 
     const scripts = await all(
       `

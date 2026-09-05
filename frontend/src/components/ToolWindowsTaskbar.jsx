@@ -1,7 +1,38 @@
+import { useEffect, useState } from "react";
 import { Pin, X } from "lucide-react";
 import Icon from "./Icon";
 import { useLanguage } from "../context/LanguageContext";
+import { useTimeSettings } from "../context/TimeSettingsContext";
 import "../styles/hoverCard.css";
+
+function TaskbarClock() {
+  const { formatClockTime, loading } = useTimeSettings();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) return null;
+
+  return (
+    <span
+      style={{
+        marginLeft: "auto",
+        paddingLeft: "12px",
+        flexShrink: 0,
+        color: "var(--subtle)",
+        fontSize: "12px",
+        fontVariantNumeric: "tabular-nums",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {formatClockTime(now)}
+    </span>
+  );
+}
 
 function TaskbarIcon({ tool, isActive }) {
   return (
@@ -50,21 +81,30 @@ export default function ToolWindowsTaskbar({ items }) {
         boxSizing: "border-box",
         background: "var(--card)",
         borderTop: "1px solid var(--border)",
-        overflowX: "auto",
       }}
     >
-      {!hasItems && (
-        <span
-          style={{
-            color: "var(--subtle)",
-            fontSize: "12px",
-          }}
-        >
-          {t("toolWindows.noneOpen")}
-        </span>
-      )}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          overflowX: "auto",
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
+        {!hasItems && (
+          <span
+            style={{
+              color: "var(--subtle)",
+              fontSize: "12px",
+            }}
+          >
+            {t("toolWindows.noneOpen")}
+          </span>
+        )}
 
-      {(items || []).map((item) => {
+        {(items || []).map((item) => {
         const { tool, isActive, isPinned, minimized, hasWindow } = item;
 
         return (
@@ -156,7 +196,10 @@ export default function ToolWindowsTaskbar({ items }) {
             )}
           </div>
         );
-      })}
+        })}
+      </div>
+
+      <TaskbarClock />
     </div>
   );
 }

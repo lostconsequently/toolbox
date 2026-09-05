@@ -545,7 +545,7 @@ export default function CodeCompareForm({ compactMode = false }) {
             {viewMode === "sideBySide"
               ? diffResult.rows.map((row, index) => (
                   <div
-                    key={index}
+                    key={`${row.originalLineNumber ?? "-"}-${row.modifiedLineNumber ?? "-"}-${index}`}
                     style={{
                       display: "grid",
                       gridTemplateColumns:
@@ -586,7 +586,9 @@ export default function CodeCompareForm({ compactMode = false }) {
               : diffResult.rows.map((row, index) => {
                   if (row.type === "changed") {
                     return (
-                      <div key={index}>
+                      <div
+                        key={`${row.originalLineNumber ?? "-"}-${row.modifiedLineNumber ?? "-"}-${index}`}
+                      >
                         <DiffLine
                           lineNumber={row.originalLineNumber}
                           content={row.originalLine}
@@ -609,7 +611,7 @@ export default function CodeCompareForm({ compactMode = false }) {
 
                   return (
                     <DiffLine
-                      key={index}
+                      key={`${row.originalLineNumber ?? "-"}-${row.modifiedLineNumber ?? "-"}-${index}`}
                       lineNumber={
                         isRemoved
                           ? row.originalLineNumber

@@ -29,34 +29,49 @@ async function applyCategoryPreset({ includeTools }) {
     throw err;
   }
 
-  // Clears the auto-seeded "General" placeholder too (or whatever single
-  // row exists) - cascades to subcategories/tools via the FK, which is a
-  // no-op here since isSeedEligible() just confirmed both are empty.
-  await run("DELETE FROM categories");
+  // Wrapped in a transaction so a mid-seed failure (disk full, a killed
+  // process, SQLITE_BUSY) can never leave a partial preset behind. Without
+  // this, isSeedEligible() would see the partial rows on the next attempt
+  // and permanently refuse to seed again - there's no UI path back to
+  // "start empty" once that happens, so a failure here has to be all-or-
+  // nothing.
+  await run("BEGIN IMMEDIATE TRANSACTION");
 
-  for (const category of CATEGORY_PRESET) {
-    const { id: categoryId } = await run(
-      "INSERT INTO categories (name, color, icon, sort_order) VALUES (?, ?, 'category', 0)",
-      [category.name, category.color],
-    );
+  try {
+    // Clears the auto-seeded "General" placeholder too (or whatever single
+    // row exists) - cascades to subcategories/tools via the FK, which is a
+    // no-op here since isSeedEligible() just confirmed both are empty.
+    await run("DELETE FROM categories");
 
-    for (const subcategory of category.subcategories) {
-      const { id: subcategoryId } = await run(
-        "INSERT INTO subcategories (category_id, name, icon, sort_order) VALUES (?, ?, 'category', 0)",
-        [categoryId, subcategory.name],
+    for (const category of CATEGORY_PRESET) {
+      const { id: categoryId } = await run(
+        "INSERT INTO categories (name, color, icon, sort_order) VALUES (?, ?, 'category', 0)",
+        [category.name, category.color],
       );
 
-      if (includeTools && subcategory.tool) {
-        const { toolType, name, description, icon } = subcategory.tool;
-
-        await run(
-          `INSERT INTO tools
-             (category_id, subcategory_id, name, description, icon, tool_type, config, input_template, enabled)
-           VALUES (?, ?, ?, ?, ?, ?, '', '', 1)`,
-          [categoryId, subcategoryId, name, description, icon, toolType],
+      for (const subcategory of category.subcategories) {
+        const { id: subcategoryId } = await run(
+          "INSERT INTO subcategories (category_id, name, icon, sort_order) VALUES (?, ?, 'category', 0)",
+          [categoryId, subcategory.name],
         );
+
+        if (includeTools && subcategory.tool) {
+          const { toolType, name, description, icon } = subcategory.tool;
+
+          await run(
+            `INSERT INTO tools
+               (category_id, subcategory_id, name, description, icon, tool_type, config, input_template, enabled)
+             VALUES (?, ?, ?, ?, ?, ?, '', '', 1)`,
+            [categoryId, subcategoryId, name, description, icon, toolType],
+          );
+        }
       }
     }
+
+    await run("COMMIT");
+  } catch (err) {
+    await run("ROLLBACK").catch(() => {});
+    throw err;
   }
 }
 

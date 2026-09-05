@@ -158,6 +158,7 @@ export default {
     favorite: "Favoryt",
     featured: "Utljochte",
     browseToolsCenter: "Nei Ark Sintrum",
+    runCardAria: "{name} útfiere",
   },
 
   toolForm: {
@@ -268,6 +269,9 @@ export default {
 
   settings: {
     title: "Ynstellingen",
+    personalScope: "Persoanlik",
+    orgDefaultNote:
+      "Dit binne dyn persoanlike foarkarren foar dizze browser. In behearder kin ek organisaasjebrede standertwearden ynstelle yn Behearsintrum → Algemien — dy jilde allinnich foar browsers dy't hjir noch gjin foarkar keazen hawwe.",
     interfaceHeading: "Ynterface",
     selectTheme: "Selektearje Tema",
     selectFont: "Selektearje Lettertype",
@@ -306,6 +310,14 @@ export default {
       "Hoe faak de Toolbox automatysk in backup makket, en hoefolle der bewarre bliuwe foardat de âldste wiske wurdt.",
     backupSettingsSaveSuccess: "Backupplanning bewarre.",
     backupSettingsSaveFailed: "Koe de backupplanning net bewarje.",
+    backupLastRun: "Lêste run",
+    backupLastRunNever: "Noch net",
+    backupNextRun: "Folgjende run",
+    backupRunStatus: {
+      created: "backup makke",
+      skipped: "oerslein, database wie beset",
+      failed: "mislearre",
+    },
     automaticBackups: "Automatyske Backups",
     backupsStored: "{count} / {max} backups opslein",
     noAutomaticBackups: "Noch gjin automatyske backups fûn",
@@ -357,6 +369,8 @@ export default {
     download: "Downloade",
     edit: "Bewurkje",
     delete: "Wiskje",
+    viewCardAria: "{name} besjen",
+    moreActions: "Mear aksjes foar {name}",
     deleteConfirmTitle: "Skript wiskje",
     deleteConfirmMessage:
       "Dit skript wiskje? Hjirmei wurde ek de sjabloanfjilden wiske.",
@@ -437,13 +451,36 @@ export default {
     tabAbout: "Oer",
     generalHeading: "Algemiene beheardersynstellingen",
     generalDescription:
-      "Beheardersynstellingen komme hjir te stean. Backup en werstellen steane ûnder it ljepblêd Backup.",
+      "Organisaasjebrede standerts foar taal, tiidsône en tema. Dizze jilde allinnich foar in browser dy't noch gjin eigen foarkar ynsteld hat.",
     contentOverview: "Ynhâld yn de Toolbox",
+    general: {
+      orgScope: "Organisaasje",
+      save: "Standerts bewarje",
+      saveSuccess: "Organisaasjestanderts bewarre.",
+      saveFailed: "Bewarjen fan de organisaasjestanderts is mislearre.",
+      loadFailed: "Opheljen fan de aktuele organisaasjestanderts is mislearre.",
+      localizationHeading: "Taal & tema",
+      fontLabel: "Lettertype",
+      timeHeading: "Tiid",
+      timeFormatLabel: "Klokwerjefte",
+      timeFormat24h: "24-oeren",
+      timeFormat12h: "12-oeren (AM/PM)",
+      timeModeLabel: "Klokboarne",
+      timeModeAuto: "Automatysk",
+      timeModeManual: "Hânmjittich",
+      timeModeAutoHint: "Folget de eigen systeemklok fan de server.",
+      timeModeManualHint:
+        "Stel yn hoe let it no wêze moat - elke werjûne tiid yn de hiele app wurdt mei it ferskil ferskood, oant't do werom setst nei Automatysk.",
+      timeManualLabel: "Aktuele datum & tiid ynstelle",
+      timeManualHint:
+        "Stelt in ferskil yn ta opsichte fan de echte tiid - elke werjûne tiid yn de hiele app wurdt mei dat ferskil ferskood, oant't do werom setst nei Automatysk.",
+      timeManualInvalid: "Fol in jildige datum en tiid yn.",
+    },
     authentication: {
       heading: "Autentikaasje",
       description:
         "Freegje opsjoneel oanmelden foardat de Toolbox brûkt wurde kin. Standert útskeakele - de besteande admintagong wurdt hjirtroch net beynfloede.",
-      modeLabel: "Modus",
+      modeLabel: "Autentikaasjemodus",
       modeDisabled: "Utskeakele",
       modeDisabledHint: "Elkenien kin de Toolbox iepenje sûnder yn te loggen.",
       modeLocal: "Lokaal wachtwurd",
@@ -451,12 +488,18 @@ export default {
       modeLocalUsers: "Lokale brûkers",
       modeLocalUsersHint:
         "Freegje in brûkersnamme en wachtwurd út de list Lokale brûkers hjirûnder.",
+      modeLocalUsersBetaNote:
+        "Beta: rollen per brûker en auditlogging binne nij en noch net op grutte skaal yn produksje test. Test earst mei in reserve-account foardat jo dit foar it hiele team ynskeakelje.",
       modeEntra: "Microsoft Entra ID (SSO)",
       modeEntraHint:
         "Fereasket Microsoft-ynlogge - gjin lokale wachtwurdopsje.",
+      modeEntraBetaNote:
+        "Beta: matching op groep-/brûkerslisten is nij. Kontrolearje oft ynlogge wurket foar in testbrûker foardat oare ynlogopsjes fuorthelle wurde.",
       modeHybrid: "Hybride (lokaal + Entra ID)",
       modeHybridHint:
         "Stean sawol Microsoft-ynlogge as it lokale wachtwurd ta.",
+      modeHybridBetaNote:
+        "Beta: kombineart de bèta-funksjes fan Lokale brûkers en Entra ID hjirboppe - lês beide notysjes foardat jo dit ynskeakelje.",
       comingSoon: "Kompt der oan",
       sessionTimeoutLabel: "Sesje-time-out (minuten)",
       sessionTimeoutHint:
@@ -472,12 +515,13 @@ export default {
       saving: "Dwaande mei bewarjen...",
       saveSuccess: "Autentikaasje-ynstellingen bewarre.",
       saveFailed: "Koe autentikaasje-ynstellingen net bewarje.",
+      loadFailed: "Koe autentikaasje-ynstellingen net lade.",
       recoveryKeyLabel: "Herstelsleutel",
       recoveryKeyConfigured: "Konfigurearre",
       recoveryKeyMissing: "Net konfigurearre",
       recoveryKeyHeading: "Herstelsleutel",
       recoveryKeyDescription:
-        "In herstelsleutel resettet it lokale wachtwurd as dat ea kwyt rekket. In nije sleutel generearje makket de foarige direkt ûnjildich - der wurket der mar ien tagelyk.",
+        "In herstelsleutel resettet it lokale behearderswachtwurd as dat ea kwyt rekket. In nije sleutel generearje makket de foarige direkt ûnjildich - der wurket der mar ien tagelyk. Dit jildt allinnich foar it inkele lokale behearderskonto - in Local Users-konto of Entra ID-oanmelding kin hjirmei net reset wurde.",
       recoveryKeyGenerate: "Nije herstelsleutel generearje",
       recoveryKeyGenerating: "Dwaande mei generearjen...",
       recoveryKeyConfirm:
@@ -490,8 +534,14 @@ export default {
       entraEncryptionKeyMissing:
         "AUTH_ENCRYPTION_KEY stiet net ynsteld op de server, dus it client secret kin noch net bewarre wurde. Stel dizze yn yn it .env-bestân fan de backend en herstart de server.",
       entraTenantIdLabel: "Tenant ID",
+      entraTenantIdHint:
+        "Te finen yn it Entra admin center op de Overview-side fan de app-registraasje - ek wol de Directory (tenant) ID neamd.",
       entraClientIdLabel: "Client ID",
+      entraClientIdHint:
+        "Te finen op deselde Overview-side as de Tenant ID - ek wol de Application (client) ID neamd.",
       entraClientSecretLabel: "Client Secret",
+      entraClientSecretHint:
+        "Oanmakke op de 'Certificates & secrets'-side fan de app-registraasje. Allinnich de wearde dy't by it oanmeitsjen toand wurdt wurket hjir - dy is letter net wer op te heljen.",
       entraClientSecretPlaceholder: "Fier it client secret yn",
       entraClientSecretKeepPlaceholder:
         "Leech litte om it hjoeddeiske secret te behâlden",
@@ -513,6 +563,7 @@ export default {
     },
     localUsers: {
       heading: "Lokale brûkers",
+      loadFailed: "Koe de list mei lokale brûkers net lade.",
       description:
         "Behear de accounts dy't mei in brûkersnamme en wachtwurd ynlogge kinne. Entra ID-accounts ferskine hjir ek sa gau't se op syn minst ien kear ynlogd hawwe.",
       addUser: "Brûker tafoegje",
@@ -554,6 +605,74 @@ export default {
       actionFailed: "Dy aksje is mislearre.",
       empty: "Noch gjin brûkers.",
     },
+    backup: {
+      heading: "Gegevensbehear & Backup",
+      manualBackupHeading: "Hânmjittige backup",
+      downloadDatabase: "Database Downloade",
+      downloadDatabaseTitle: "Databasebackup downloade",
+      restoreDatabase: "Database Werstelle",
+      restoreDatabaseTitle: "Backup werstelle",
+      backupCenter: "Database Backup Sintrum",
+      lastBackup: "Lêste backup:",
+      never: "Noait",
+      backupAvailable: "Databasebackup beskikber",
+      noBackupYet: "Noch gjin databasebackup",
+      backupStatusLabel: "Status",
+      backupScheduleHeading: "Planning automatyske backups",
+      backupIntervalLabel: "Backup-ynterfal (oeren)",
+      backupIntervalHint: "Hoe faak de Toolbox automatysk in backup makket.",
+      maxBackupsLabel: "Maksimaal oantal backups",
+      maxBackupsHint:
+        "Hoefolle automatyske backups bewarre bliuwe foardat de âldste wiske wurdt.",
+      backupScheduleHint:
+        "Hoe faak de Toolbox automatysk in backup makket, en hoefolle der bewarre bliuwe foardat de âldste wiske wurdt.",
+      scheduleSaveSuccess: "Backupplanning bewarre.",
+      scheduleSaveFailed: "Koe de backupplanning net bewarje.",
+      loadBackupsFailed: "Koe de list mei backups net lade.",
+      loadScheduleFailed: "Koe de backupplanning net lade.",
+      backupLastRun: "Lêste run",
+      backupLastRunNever: "Noch net",
+      backupNextRun: "Folgjende run",
+      backupRunStatus: {
+        created: "backup makke",
+        skipped: "oerslein, database wie beset",
+        failed: "mislearre",
+      },
+      automaticBackups: "Automatyske Backups",
+      backupsStored: "{count} / {max} backups opslein",
+      moreActions: "Mear aksjes foar {name}",
+      noAutomaticBackups: "Noch gjin automatyske backups fûn",
+      downloadFailed: "Database downloade mislearre.",
+      restoreConfirm: "De hjoeddeistige database wurdt oerskreaun. Trochgean?",
+      restoreConfirmStep2:
+        "Binne jo wis? Dit kin net ûngedien makke wurde - alle gegevens dy't tafoege binne sûnt it uploade bestân makke is, geane ferlern.",
+      restoreSuccess:
+        "Database mei sukses werstelt. De Toolbox wurdt no opnij laden.",
+      restoreFailed: "Werstellen mislearre.",
+      backupTypeAutomatic: "Automatysk",
+      backupTypeSafety: "Feilichheidsback-up",
+      backupTypeUnknown: "Unbekend",
+      downloadBackup: "Downloade",
+      downloadBackupTitle: "Downloade dizze back-up",
+      downloadBackupFailed: "Downloaden fan back-up mislearre.",
+      restoreBackup: "Werstelle",
+      restoreBackupTitle: "Werstelle dizze back-up",
+      restoreBackupInProgress: "Dwaande mei werstellen...",
+      restoreBackupStep1Warning:
+        "It werstellen fan in back-up oerskriuwt de hjoeddeistige database. Alle wizigingen sûnt dizze back-up geane ferlern.",
+      restoreBackupPrepareFailed:
+        "Koe gjin feilichheidsback-up meitsje. Werstellen annulearre.",
+      safetyBackupDownloadFailed:
+        "Koe de feilichheidsback-up net downloade, mar dizze is wol op de server oanmakke foardat der fierder gien is.",
+      restoreBackupStep3Confirm:
+        "Der is earst in feilichheidsback-up makke fan de hjoeddeistige situaasje ({file}). Binne jo wis dat jo de selektearre back-up werstelle wolle?",
+      restoreCancelFailed:
+        "Koe de werstelsesje net annulearje op de server - dizze ferrint fansels binnenkoart.",
+      restoreBackupSuccessDetail: "Back-up mei sukses werstelt: {file} ({time}).",
+      restoreBackupFailedRolledBack:
+        "Werstellen mislearre. De database is automatysk werstelt nei de foarige steat.",
+      refreshPrompt: "No de side ferfarskje om de wizigingen te sjen?",
+    },
     branding: {
       heading: "Hússtyl",
       description:
@@ -586,7 +705,11 @@ export default {
       imageRemoveFailed: "Koe de ôfbylding net wiskje.",
       themeHeading: "Temakleuren",
       primaryColorLabel: "Primêre kleur",
+      primaryColorHint:
+        "Brûkt foar knoppen, links en de oanmeldknop troch de hiele app hinne.",
       accentColorLabel: "Aksintkleur",
+      accentColorHint:
+        "Sunich brûkt, foar de markearringsbalke fan it aktive sidebar-item.",
       invalidColor: "Kleuren moatte in hexwearde wêze lykas #3b82f6.",
       loginHeading: "Ynlochskerm",
       loginTitleLabel: "Ynlochtitel",
@@ -611,6 +734,7 @@ export default {
       previewLogin: "Ynlochskerm",
     },
     about: {
+      loadFailed: "Koe systeemynformaasje net lade.",
       applicationInfo: "Applikaasje-ynformaasje",
       version: "Ferzje",
       release: "Release",
@@ -675,11 +799,13 @@ export default {
       retentionSystemLabel: "Bewartermyn systeemlogs (dagen)",
       retentionErrorLabel: "Bewartermyn flaterlogs (dagen)",
       retentionSecurityLabel: "Bewartermyn audit-/befeiligingslogs (dagen)",
+      retentionDaysHint: "0 dagen bewarret regels foar altyd.",
       retentionMaxRowsLabel: "Maksimaal oantal bewarre logboekregels",
       retentionHint:
-        "0 dagen bewarret regels foar altyd. It maksimumoantal regels wurdt altyd hantearre, wat de leeftyd ek is, as feilichheidsgrins.",
+        "Wurdt altyd hantearre, wat de leeftyd ek is, as feilichheidsgrins los fan de bewartermynen hjirboppe.",
       retentionSaved: "Bewarynstellingen bewarre.",
       retentionSaveFailed: "Koe bewarynstellingen net bewarje.",
+      retentionLoadFailed: "Koe bewarynstellingen net lade.",
       purgeHeading: "Logs wiskje",
       purgeScopeLabel: "Berik",
       purgeScope: {
@@ -962,6 +1088,60 @@ export default {
     close: "Finster slute",
   },
 
+  codeCompare: {
+    title: "Koade fergelykje",
+    description:
+      "Fergelykje twa stikken tekst of koade neist elkoar. Alles rint lokaal yn dyn browser - der wurdt neat nei de server stjoerd.",
+    originalLabel: "Oarspronklik",
+    modifiedLabel: "Wizige",
+    originalPlaceholder: "Plak of typ hjir de oarspronklike tekst of koade",
+    modifiedPlaceholder: "Plak of typ hjir de wizige tekst of koade",
+    originalAriaLabel: "Oarspronklike tekst",
+    modifiedAriaLabel: "Wizige tekst",
+    lineNumbersAriaLabel: "Rigelnûmers",
+    languageLabel: "Taal",
+    languages: {
+      plaintext: "Gewoane tekst",
+      json: "JSON",
+      javascript: "JavaScript",
+      typescript: "TypeScript",
+      powershell: "PowerShell",
+      html: "HTML",
+      css: "CSS",
+      sql: "SQL",
+      xml: "XML",
+      yaml: "YAML",
+    },
+    viewModeLabel: "Werjefte",
+    viewModeSideBySide: "Neist elkoar",
+    viewModeInline: "Ynline",
+    optionsTitle: "Opsjes",
+    ignoreWhitespace: "Wytromte negearje",
+    ignoreCase: "Haad- en lytse letters negearje",
+    ignoreEmptyLines: "Lege rigels negearje",
+    actionCompare: "Fergelykje",
+    actionSwap: "Kanten wikselje",
+    actionSwapTitle: "Wiksel de oarspronklike en wizige tekst",
+    actionClear: "Wiskje",
+    actionClearTitle: "Beide bewurkers wiskje",
+    actionCopyResult: "Resultaat kopiearje",
+    copiedResult: "Resultaat kopiearre",
+    copyFailed: "Kopiearjen mislearre",
+    resultTitle: "Ferskillen",
+    legendAdded: "Tafoege",
+    legendRemoved: "Fuortsmiten",
+    legendChanged: "Wizige",
+    statusEmpty: "Fier tekst yn yn beide bewurkers om de ferskillen te sjen.",
+    statusIdentical: "Gjin ferskillen fûn.",
+    statusDifferences:
+      "{count} ferskil(len) fûn: {added} tafoege, {removed} fuortsmiten, {changed} wizige.",
+    statusTooLarge:
+      "Dizze teksten binne te grut of te ferskillend om rigel foar rigel te fergelykjen. Probearje in lytsere seleksje.",
+    statusError: "Der gie wat mis by it fergelykjen fan dizze ynfier.",
+    largeInputWarning:
+      "Ynfier is grut - automatyske fergeliking is pauzearre. Klik op Fergelykje om it út te fieren.",
+  },
+
   setupWizard: {
     stepWelcome: "Wolkom",
     stepMethod: "Ynstallaasjemetoade",
@@ -1031,6 +1211,7 @@ export default {
     configureStepFinishing: "Ofrûnje...",
     configureFailed: "Setup koe net ôfrûne wurde.",
     tryAgain: "Opnij probearje",
+    startOver: "Opnij begjinne",
 
     doneTitle: "Toolbox is klear",
     doneDescription: "Setup mei sukses ôfrûn.",

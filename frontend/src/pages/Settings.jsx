@@ -4,15 +4,20 @@ import {
   Star,
   Clock3,
   FolderTree,
+  LayoutDashboard,
   Minimize2,
+  Palette,
 } from "lucide-react";
 
 import { useSettings } from "../context/SettingsContext";
 import FontSelect from "../components/FontSelect";
 import Header from "../components/Header";
+import Card from "../components/shared/Card";
+import SelectField from "../components/toolForms/shared/SelectField";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { themes } from "../core/themes";
+import { cardPadding, stackedFieldMaxWidth } from "../core/tokens";
 
 export default function Settings() {
   const { language, setLanguage, languages, t } = useLanguage();
@@ -22,6 +27,19 @@ export default function Settings() {
   const { settings, updateSetting } = useSettings();
 
   const compactMode = settings?.compactMode || false;
+
+  const themeOptions = Object.entries(themes)
+    .map(([key, def]) => ({ value: key, label: def.name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const languageOptions = languages
+    .map((entry) => ({ value: entry.code, label: entry.label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const cardStyle = {
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
+  };
 
   return (
     <div>
@@ -33,103 +51,46 @@ export default function Settings() {
         ]}
       />
 
-      <div
-        style={{
-          background: "var(--card)",
-          padding: compactMode ? "14px" : "20px",
-          borderRadius: "12px",
-          marginBottom: compactMode ? "14px" : "20px",
-          border: "1px solid var(--border)",
-        }}
-      >
-        <h2>{t("settings.interfaceHeading")}</h2>
+      <Card style={cardStyle} hoverLift={false}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "12px",
+          }}
+        >
+          <Palette size={16} />
+          <h3 style={{ margin: 0 }}>{t("settings.interfaceHeading")}</h3>
+        </div>
 
         <div
           style={{
-            marginBottom: compactMode ? "14px" : "24px",
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "14px",
+            maxWidth: stackedFieldMaxWidth,
           }}
         >
-          <label
-            style={{
-              display: "block",
-              marginBottom: "8px",
-              fontWeight: "600",
-            }}
-          >
-            {t("settings.selectTheme")}
-          </label>
-
-          <select
+          <SelectField
+            label={t("setupWizard.themeLabel")}
             value={theme}
-            onChange={(e) => updateTheme(e.target.value)}
-            style={{
-              width: "100%",
-              maxWidth: "260px",
-              height: compactMode ? "36px" : "42px",
-              boxSizing: "border-box",
-              background: "var(--surface)",
-              color: "var(--text)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "0 12px",
-              fontSize: "14px",
-              outline: "none",
-            }}
-          >
-            {Object.entries(themes).map(([key, themeDef]) => (
-              <option key={key} value={key}>
-                {themeDef.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            onChange={updateTheme}
+            compactMode={compactMode}
+            className="hover-card"
+            options={themeOptions}
+          />
 
-        <div
-          style={{
-            marginBottom: compactMode ? "14px" : "24px",
-          }}
-        >
-          <label
-            style={{
-              display: "block",
-              marginBottom: "8px",
-              fontWeight: "600",
-            }}
-          >
-            {t("settings.selectLanguage")}
-          </label>
-
-          <select
+          <SelectField
+            label={t("setupWizard.languageLabel")}
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            style={{
-              width: "100%",
-              maxWidth: "260px",
-              height: compactMode ? "36px" : "42px",
-              boxSizing: "border-box",
-              background: "var(--surface)",
-              color: "var(--text)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "0 12px",
-              fontSize: "14px",
-              outline: "none",
-            }}
-          >
-            {languages.map((entry) => (
-              <option key={entry.code} value={entry.code}>
-                {entry.label}
-              </option>
-            ))}
-          </select>
-        </div>
+            onChange={setLanguage}
+            compactMode={compactMode}
+            className="hover-card"
+            options={languageOptions}
+          />
 
-        {theme === "matrix" && (
-          <div
-            style={{
-              marginBottom: compactMode ? "14px" : "24px",
-            }}
-          >
+          {theme === "matrix" && (
             <label
               style={{
                 display: "flex",
@@ -146,61 +107,66 @@ export default function Settings() {
               />
               {t("settings.matrixEffect")}
             </label>
-          </div>
-        )}
+          )}
 
-        <div
-          style={{
-            marginBottom: "24px",
-          }}
-        >
+          <div>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                marginBottom: "6px",
+                color: "var(--subtle)",
+                fontSize: "12px",
+                fontWeight: "600",
+              }}
+            >
+              {t("adminCenter.general.fontLabel")}
+            </label>
+
+            <FontSelect
+              value={settings.fontFamily}
+              onChange={(key) => updateSetting("fontFamily", key)}
+              compactMode={compactMode}
+              className="hover-card"
+            />
+          </div>
+
           <label
             style={{
-              display: "block",
-              marginBottom: "8px",
-              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
             }}
           >
-            {t("settings.selectFont")}
+            <input
+              type="checkbox"
+              checked={settings.compactMode}
+              onChange={(e) => updateSetting("compactMode", e.target.checked)}
+            />
+            <Minimize2 size={16} />
+            {t("settings.compactMode")}
           </label>
-
-          <FontSelect
-            value={settings.fontFamily}
-            onChange={(key) => updateSetting("fontFamily", key)}
-            compactMode={compactMode}
-          />
         </div>
+      </Card>
 
-        <label
+      <Card style={cardStyle} hoverLift={false}>
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            marginBottom: "24px",
+            marginBottom: "12px",
           }}
         >
-          <input
-            type="checkbox"
-            checked={settings.compactMode}
-            onChange={(e) => updateSetting("compactMode", e.target.checked)}
-          />
-          <Minimize2 size={16} />
-          {t("settings.compactMode")}
-        </label>
+          <LayoutDashboard size={16} />
+          <h3 style={{ margin: 0 }}>
+            {t("settings.dashboardPrefsHeading")}
+          </h3>
+        </div>
 
-        <h2>{t("settings.dashboardPrefsHeading")}</h2>
-
-        <div
-          style={{
-            marginBottom: "24px",
-          }}
-        >
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-            }}
-          >
+        <div style={{ display: "grid", gap: "10px" }}>
+          <label style={{ display: "block" }}>
             <input
               type="checkbox"
               checked={settings.showStats}
@@ -216,12 +182,7 @@ export default function Settings() {
             {t("settings.showStats")}
           </label>
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-            }}
-          >
+          <label style={{ display: "block" }}>
             <input
               type="checkbox"
               checked={settings.showQuickCategories}
@@ -239,12 +200,7 @@ export default function Settings() {
             {t("settings.showQuickCategories")}
           </label>
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-            }}
-          >
+          <label style={{ display: "block" }}>
             <input
               type="checkbox"
               checked={settings.showFavorites}
@@ -260,12 +216,7 @@ export default function Settings() {
             {t("settings.showFavorites")}
           </label>
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-            }}
-          >
+          <label style={{ display: "block" }}>
             <input
               type="checkbox"
               checked={settings.showRecentTools}
@@ -283,12 +234,7 @@ export default function Settings() {
             {t("settings.showRecentTools")}
           </label>
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-            }}
-          >
+          <label style={{ display: "block" }}>
             <input
               type="checkbox"
               checked={settings.showCategories}
@@ -306,7 +252,7 @@ export default function Settings() {
             {t("settings.showCategories")}
           </label>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

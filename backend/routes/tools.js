@@ -9,12 +9,12 @@ const { isAdminRequest } = require("./auth");
 const toolSchema = {
   categoryId: { type: "number", required: true, label: "Category" },
   subcategoryId: { type: "number", default: null },
-  name: { type: "string", required: true, label: "Name" },
-  description: { type: "string", default: "" },
-  icon: { type: "string", default: "tool" },
-  toolType: { type: "string", default: "lookup" },
-  config: { type: "string", default: "" },
-  inputTemplate: { type: "string", default: "" },
+  name: { type: "string", required: true, label: "Name", max: 200 },
+  description: { type: "string", default: "", max: 5000 },
+  icon: { type: "string", default: "tool", max: 100 },
+  toolType: { type: "string", required: true, label: "Tool type", max: 50 },
+  config: { type: "string", default: "", max: 200000 },
+  inputTemplate: { type: "string", default: "", max: 200000 },
   favorite: { type: "boolean", default: false },
   enabled: { type: "boolean", default: true },
   isDraft: { type: "boolean", default: false },
@@ -71,7 +71,7 @@ function fetchTool(id) {
 async function getToolOr404(id, req, res) {
   const tool = await fetchTool(id);
 
-  if (!tool || (tool.isDraft && !isAdminRequest(req))) {
+  if (!tool || (tool.isDraft && !(await isAdminRequest(req)))) {
     res.status(404).json({ error: "Tool not found" });
     return null;
   }
@@ -79,10 +79,28 @@ async function getToolOr404(id, req, res) {
   return tool;
 }
 
+// `limit`/`offset` are optional so existing callers that fetch the whole
+// list keep working unchanged - a large catalog can opt into paging by
+// passing them instead of the whole table needing a breaking response-shape
+// change today.
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const isAdmin = isAdminRequest(req);
+    const isAdmin = await isAdminRequest(req);
+
+    const params = [];
+    let limitClause = "";
+
+    if (req.query.limit !== undefined) {
+      const limit = Math.min(
+        Math.max(parseInt(req.query.limit, 10) || 1, 1),
+        500,
+      );
+      const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+
+      limitClause = "LIMIT ? OFFSET ?";
+      params.push(limit, offset);
+    }
 
     const tools = await all(
       `
@@ -90,7 +108,9 @@ router.get(
       FROM tools
       ${isAdmin ? "" : "WHERE is_draft = 0"}
       ORDER BY sort_order ASC, name ASC
+      ${limitClause}
       `,
+      params,
     );
 
     res.json(tools.map(mapToolRow));
@@ -100,6 +120,11 @@ router.get(
 router.get(
   "/:id",
   asyncHandler(async (req, res) => {
+    if (!/^\d+$/.test(req.params.id)) {
+      res.status(400).json({ error: "Invalid tool id" });
+      return;
+    }
+
     const tool = await getToolOr404(req.params.id, req, res);
     if (!tool) return;
 

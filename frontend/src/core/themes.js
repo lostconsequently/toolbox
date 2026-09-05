@@ -2,6 +2,7 @@ const darkStatus = {
   statusSuccess: "#22c55e",
   statusWarning: "#f59e0b",
   statusError: "#fca5a5",
+  statusInfo: "#3b82f6",
 };
 
 export const themes = {
@@ -55,7 +56,7 @@ export const themes = {
     card: "#161616",
     border: "#15803d",
     text: "#22c55e",
-    subtleText: "#16a34a",
+    subtleText: "#4d7a5a",
     primary: "#22c55e",
     overlay: "rgba(34,197,94,0.06)",
     ...darkStatus,
@@ -76,6 +77,7 @@ export const themes = {
     statusSuccess: "#0f3d23",
     statusWarning: "#5c2a0a",
     statusError: "#641414",
+    statusInfo: "#0a2c5c",
   },
 
   slate: {
@@ -120,6 +122,7 @@ export const themes = {
     statusSuccess: "#166534",
     statusWarning: "#92400e",
     statusError: "#991b1b",
+    statusInfo: "#1d4ed8",
   },
 
   winxp: {
@@ -132,10 +135,11 @@ export const themes = {
     text: "#15243b",
     subtleText: "#4c5f78",
     primary: "#1a56c4",
-    overlay: "rgba(255,255,255,0.55)",
+    overlay: "rgba(255,255,255,0.15)",
     statusSuccess: "#2f7a1f",
     statusWarning: "#92400e",
     statusError: "#991b1b",
+    statusInfo: "#1d4ed8",
     hasSceneBackground: true,
   },
 };

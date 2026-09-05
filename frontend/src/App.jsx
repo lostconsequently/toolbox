@@ -43,14 +43,22 @@ function App() {
     document.title = appName;
   }, [appName]);
 
+  // index.html declares multiple <link rel="icon"> variants (.ico, two PNG
+  // sizes, SVG) so browsers can pick whichever they render best - updating
+  // only the first one left most browsers still showing the built-in icon.
+  // Each link's original href is captured once (before any override) so a
+  // custom favicon can be reverted back to the real default on remove/reset,
+  // instead of leaving the last-set custom icon stuck in the tab forever.
   useEffect(() => {
-    if (!faviconUrl) return;
+    const links = document.querySelectorAll('link[rel="icon"]');
 
-    const link = document.querySelector('link[rel="icon"]');
+    links.forEach((link) => {
+      if (!link.dataset.defaultHref) {
+        link.dataset.defaultHref = link.href;
+      }
 
-    if (link) {
-      link.href = faviconUrl;
-    }
+      link.href = faviconUrl || link.dataset.defaultHref;
+    });
   }, [faviconUrl]);
 
   const matrixRainActive =
@@ -86,6 +94,8 @@ function App() {
         "--status-warning": currentTheme.statusWarning,
 
         "--status-error": currentTheme.statusError,
+
+        "--status-info": currentTheme.statusInfo,
 
         backgroundColor: customBackgroundActive
           ? "transparent"

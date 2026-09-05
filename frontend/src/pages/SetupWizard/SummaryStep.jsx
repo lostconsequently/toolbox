@@ -89,6 +89,15 @@ export default function SummaryStep({ wizardState, onNext, onBack }) {
         />
 
         <SummaryRow label={t("setupWizard.summaryTheme")} value={themeLabel} />
+
+        <SummaryRow
+          label={t("adminCenter.general.timeFormatLabel")}
+          value={t(
+            wizardState.timeFormat === "12h"
+              ? "adminCenter.general.timeFormat12h"
+              : "adminCenter.general.timeFormat24h",
+          )}
+        />
       </div>
 
       <ActionRow justify="space-between" marginTop="24px">

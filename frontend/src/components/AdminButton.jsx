@@ -106,6 +106,7 @@ export default function AdminButton() {
             right: 0,
             top: "46px",
             width: "280px",
+            maxWidth: "calc(100vw - 24px)",
             background: "var(--card)",
             border: "1px solid var(--border)",
             borderRadius: "12px",

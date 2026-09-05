@@ -20,6 +20,7 @@ import {
   scoreTool,
   sortByScoreDesc,
 } from "../core/utils/search";
+import { modal } from "../core/tokens";
 
 const RESULT_LIMIT = 8;
 
@@ -273,12 +274,12 @@ export default function CommandPalette() {
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0, 0, 0, 0.6)",
+          background: modal.scrim,
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-start",
           paddingTop: "12vh",
-          zIndex: 10000,
+          zIndex: modal.zIndex,
         }}
         onClick={close}
       >
@@ -292,7 +293,7 @@ export default function CommandPalette() {
           style={{
             background: "var(--card)",
             border: "1px solid var(--border)",
-            borderRadius: "14px",
+            borderRadius: modal.panelRadius,
             width: "100%",
             maxWidth: "560px",
             boxShadow: "0 20px 60px rgba(0,0,0,0.45)",

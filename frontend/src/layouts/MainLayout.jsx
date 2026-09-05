@@ -10,9 +10,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useSettings } from "../context/SettingsContext";
 import { useLanguage } from "../context/LanguageContext";
 import { themes } from "../core/themes";
-import { TASKBAR_HEIGHT } from "../core/tokens";
-
-const MOBILE_DRAWER_BREAKPOINT = "(max-width: 640px)";
+import { MOBILE_BREAKPOINT_QUERY, TASKBAR_HEIGHT } from "../core/tokens";
 
 function LoadingSkeleton() {
   return (
@@ -37,7 +35,7 @@ export default function MainLayout({ children }) {
   const { loading } = useApp();
   const { isAuthRequired, user, logout } = useAuth();
   const isNarrowViewport = useMediaQuery("(max-width: 900px)");
-  const isMobileViewport = useMediaQuery(MOBILE_DRAWER_BREAKPOINT);
+  const isMobileViewport = useMediaQuery(MOBILE_BREAKPOINT_QUERY);
   const { theme } = useTheme();
   const { settings } = useSettings();
   const { t } = useLanguage();

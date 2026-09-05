@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 
+import { TASKBAR_HEIGHT } from "../core/tokens";
+
 const ToolWindowsContext = createContext();
 
 const DEFAULT_WIDTH = 980;
@@ -71,7 +73,11 @@ function samePinnedEntry(entry, kind, id) {
 
 function clampPosition(position, size) {
   const maxX = Math.max(0, window.innerWidth - size.width);
-  const maxY = Math.max(0, window.innerHeight - size.height);
+  // Opening any window immediately shows the fixed-position taskbar at the
+  // bottom (see ToolWindowManager - it lists every open window, not just
+  // minimized ones), so the usable vertical space is the viewport minus the
+  // taskbar, not the full viewport.
+  const maxY = Math.max(0, window.innerHeight - TASKBAR_HEIGHT - size.height);
 
   return {
     x: Math.min(Math.max(position.x, 0), maxX),
@@ -95,14 +101,18 @@ export function ToolWindowsProvider({ children }) {
 
     const size = {
       width: Math.min(DEFAULT_WIDTH, window.innerWidth - 40),
-      height: Math.min(DEFAULT_HEIGHT, window.innerHeight - 100),
+      height: Math.min(DEFAULT_HEIGHT, window.innerHeight - TASKBAR_HEIGHT - 60),
     };
 
     const step = cascadeCount.current % CASCADE_MAX_STEPS;
     cascadeCount.current += 1;
 
+    // Center against the space actually visible above the taskbar, not the
+    // full viewport - otherwise the window looks pushed down and its bottom
+    // ends up tucked behind the taskbar (see clampPosition above).
+    const usableHeight = window.innerHeight - TASKBAR_HEIGHT;
     const centeredX = (window.innerWidth - size.width) / 2;
-    const centeredY = (window.innerHeight - size.height) / 2;
+    const centeredY = (usableHeight - size.height) / 2;
 
     const cascadeOffset = step * (CASCADE_STEP / 2);
 

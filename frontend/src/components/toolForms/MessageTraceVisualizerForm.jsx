@@ -310,7 +310,7 @@ export default function MessageTraceVisualizerForm({ compactMode = false }) {
                 <div style={{ display: "grid", gap: "8px" }}>
                   {group.hops.map((hop, index) => (
                     <div
-                      key={index}
+                      key={`${index}-${hop.timestampRaw || hop.event}`}
                       style={{
                         display: "grid",
                         gridTemplateColumns: "auto 1fr auto auto",
@@ -456,7 +456,7 @@ export default function MessageTraceVisualizerForm({ compactMode = false }) {
             >
               {result.summary.messages.map((message, index) => (
                 <div
-                  key={index}
+                  key={`${index}-${message.timestampRaw || message.subject}`}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "auto 1fr 1fr auto",

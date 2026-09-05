@@ -18,7 +18,7 @@ const STAGES = [
   { key: "configureStepFinishing", at: 92 },
 ];
 
-export default function ConfigureStep({ wizardState, onDone }) {
+export default function ConfigureStep({ wizardState, onDone, onRestart }) {
   const { t } = useLanguage();
 
   const [progress, setProgress] = useState(0);
@@ -47,6 +47,7 @@ export default function ConfigureStep({ wizardState, onDone }) {
         language: wizardState.language,
         timezone: wizardState.timezone,
         theme: wizardState.theme,
+        timeFormat: wizardState.timeFormat,
         restoreToken:
           wizardState.method === "restore" ? wizardState.restoreToken : undefined,
         seedOption:
@@ -105,6 +106,16 @@ export default function ConfigureStep({ wizardState, onDone }) {
             <ActionButton variant="primary" onClick={run} disabled={running}>
               {t("setupWizard.tryAgain")}
             </ActionButton>
+
+            {onRestart && (
+              <ActionButton
+                variant="secondary"
+                onClick={onRestart}
+                disabled={running}
+              >
+                {t("setupWizard.startOver")}
+              </ActionButton>
+            )}
           </ActionRow>
         </>
       )}

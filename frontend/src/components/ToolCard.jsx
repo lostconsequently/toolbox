@@ -1,7 +1,6 @@
 import "../styles/hoverCard.css";
 import Icon from "./Icon";
 import ToolTypeBadge from "./ToolTypeBadge";
-import ActionButton from "./toolForms/shared/ActionButton";
 import Card from "./shared/Card";
 import { useSettings } from "../context/SettingsContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -22,7 +21,16 @@ export default function ToolCard({
   return (
     <Card
       hoverShadow
+      role="button"
       tabIndex={0}
+      onClick={() => onRun(tool)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onRun(tool);
+        }
+      }}
+      aria-label={t("toolsPage.runCardAria", { name: tool.name })}
       style={{
         padding: compactMode ? "12px" : "18px",
         marginBottom: "12px",
@@ -31,6 +39,7 @@ export default function ToolCard({
         justifyContent: "space-between",
         alignItems: "center",
         gap: compactMode ? "12px" : "20px",
+        cursor: "pointer",
       }}
     >
       <div
@@ -68,7 +77,10 @@ export default function ToolCard({
           </div>
 
           <button
-            onClick={() => onToggleFavorite(tool.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleFavorite(tool.id);
+            }}
             title={t("toolsPage.favorite")}
             aria-label={t("toolsPage.favorite")}
             style={{
@@ -122,18 +134,6 @@ export default function ToolCard({
             {tool.description}
           </div>
         )}
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          flexShrink: 0,
-        }}
-      >
-        <ActionButton onClick={() => onRun(tool)} compactMode={compactMode}>
-          {t("common.run")}
-        </ActionButton>
       </div>
     </Card>
   );

@@ -151,11 +151,15 @@ export default function ReverseDnsForm({ compactMode = false }) {
               label="PTR validation"
               icon={
                 result.ptrValid ? (
-                  <ShieldCheck size={14} color="#16a34a" />
+                  <ShieldCheck size={14} color="var(--status-success)" />
                 ) : (
                   <ShieldX
                     size={14}
-                    color={result.forwardError ? "#d97706" : "#dc2626"}
+                    color={
+                      result.forwardError
+                        ? "var(--status-warning)"
+                        : "var(--status-error)"
+                    }
                   />
                 )
               }

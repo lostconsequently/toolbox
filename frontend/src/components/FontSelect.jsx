@@ -5,9 +5,17 @@ import { fontRegistry } from "../config/fontRegistry";
 import { useLanguage } from "../context/LanguageContext";
 import "../styles/hoverCard.css";
 
-const fontKeys = Object.keys(fontRegistry);
+const fontKeys = Object.keys(fontRegistry).sort((a, b) =>
+  fontRegistry[a].label.localeCompare(fontRegistry[b].label),
+);
 
-export default function FontSelect({ value, onChange, compactMode }) {
+export default function FontSelect({
+  value,
+  onChange,
+  compactMode,
+  disabled = false,
+  className = "",
+}) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
@@ -82,10 +90,11 @@ export default function FontSelect({ value, onChange, compactMode }) {
   return (
     <div
       ref={containerRef}
+      className={className}
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: "320px",
+        maxWidth: "360px",
       }}
     >
       <button
@@ -95,11 +104,14 @@ export default function FontSelect({ value, onChange, compactMode }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
+        disabled={disabled}
         onClick={() => {
+          if (disabled) return;
+
           setActiveIndex(Math.max(fontKeys.indexOf(value), 0));
           setOpen((prev) => !prev);
         }}
-        onKeyDown={handleTriggerKeyDown}
+        onKeyDown={disabled ? undefined : handleTriggerKeyDown}
         style={{
           width: "100%",
           height: compactMode ? "36px" : "42px",
@@ -114,7 +126,8 @@ export default function FontSelect({ value, onChange, compactMode }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.6 : 1,
         }}
       >
         <span>{selected.label}</span>

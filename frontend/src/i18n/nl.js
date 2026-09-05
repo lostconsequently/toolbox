@@ -160,6 +160,7 @@ export default {
     favorite: "Favoriet",
     featured: "Uitgelicht",
     browseToolsCenter: "Naar Tools Center",
+    runCardAria: "{name} uitvoeren",
   },
 
   toolForm: {
@@ -270,6 +271,9 @@ export default {
 
   settings: {
     title: "Instellingen",
+    personalScope: "Persoonlijk",
+    orgDefaultNote:
+      "Dit zijn je persoonlijke voorkeuren voor deze browser. Een beheerder kan ook organisatiebrede standaardwaarden instellen in Beheercentrum → Algemeen — die gelden alleen voor browsers die hier nog geen voorkeur hebben gekozen.",
     interfaceHeading: "Interface",
     selectTheme: "Selecteer Thema",
     selectFont: "Selecteer Lettertype",
@@ -308,6 +312,14 @@ export default {
       "Hoe vaak de Toolbox automatisch een backup maakt, en hoeveel er bewaard blijven voordat de oudste wordt verwijderd.",
     backupSettingsSaveSuccess: "Backupplanning opgeslagen.",
     backupSettingsSaveFailed: "Kon de backupplanning niet opslaan.",
+    backupLastRun: "Laatste run",
+    backupLastRunNever: "Nog nooit",
+    backupNextRun: "Volgende run",
+    backupRunStatus: {
+      created: "backup gemaakt",
+      skipped: "overgeslagen, database was bezig",
+      failed: "mislukt",
+    },
     automaticBackups: "Automatische Backups",
     backupsStored: "{count} / {max} backups opgeslagen",
     noAutomaticBackups: "Nog geen automatische backups gevonden",
@@ -360,6 +372,8 @@ export default {
     download: "Downloaden",
     edit: "Bewerken",
     delete: "Verwijderen",
+    viewCardAria: "{name} bekijken",
+    moreActions: "Meer acties voor {name}",
     deleteConfirmTitle: "Script verwijderen",
     deleteConfirmMessage:
       "Dit script verwijderen? Hiermee worden ook de sjabloonvelden verwijderd.",
@@ -442,13 +456,36 @@ export default {
     tabAbout: "Over",
     generalHeading: "Algemene beheerdersinstellingen",
     generalDescription:
-      "Beheerdersinstellingen komen hier te staan. Back-up en herstel staan onder het tabblad Back-up.",
+      "Organisatiebrede standaarden voor taal, tijdzone en thema. Deze gelden alleen voor een browser die nog geen eigen voorkeur heeft ingesteld.",
     contentOverview: "Inhoud in de Toolbox",
+    general: {
+      orgScope: "Organisatie",
+      save: "Standaarden opslaan",
+      saveSuccess: "Organisatiestandaarden opgeslagen.",
+      saveFailed: "Opslaan van de organisatiestandaarden is mislukt.",
+      loadFailed: "Ophalen van de huidige organisatiestandaarden is mislukt.",
+      localizationHeading: "Taal & thema",
+      fontLabel: "Lettertype",
+      timeHeading: "Tijd",
+      timeFormatLabel: "Klokweergave",
+      timeFormat24h: "24-uurs",
+      timeFormat12h: "12-uurs (AM/PM)",
+      timeModeLabel: "Klokbron",
+      timeModeAuto: "Automatisch",
+      timeModeManual: "Handmatig",
+      timeModeAutoHint: "Volgt de eigen systeemklok van de server.",
+      timeModeManualHint:
+        "Stel in hoe laat het nu zou moeten zijn - elke weergegeven tijd in de hele app wordt met het verschil verschoven, totdat je terugzet naar Automatisch.",
+      timeManualLabel: "Huidige datum & tijd instellen",
+      timeManualHint:
+        "Stelt een verschil in ten opzichte van de echte tijd - elke weergegeven tijd in de hele app wordt met dat verschil verschoven, totdat je terugzet naar Automatisch.",
+      timeManualInvalid: "Vul een geldige datum en tijd in.",
+    },
     authentication: {
       heading: "Authenticatie",
       description:
         "Vereis optioneel dat gebruikers inloggen voordat ze de Toolbox kunnen gebruiken. Standaard uitgeschakeld - de bestaande admintoegang wordt hierdoor niet beïnvloed.",
-      modeLabel: "Modus",
+      modeLabel: "Authenticatiemodus",
       modeDisabled: "Uitgeschakeld",
       modeDisabledHint: "Iedereen kan de Toolbox openen zonder in te loggen.",
       modeLocal: "Lokaal wachtwoord",
@@ -456,11 +493,17 @@ export default {
       modeLocalUsers: "Lokale gebruikers",
       modeLocalUsersHint:
         "Vereis een gebruikersnaam en wachtwoord uit de lijst Lokale gebruikers hieronder.",
+      modeLocalUsersBetaNote:
+        "Beta: rollen per gebruiker en auditlogging zijn nieuw en nog niet op grote schaal in productie getest. Test eerst met een reserveaccount voordat je dit voor je hele team inschakelt.",
       modeEntra: "Microsoft Entra ID (SSO)",
       modeEntraHint: "Vereis Microsoft-login - geen lokale wachtwoordoptie.",
+      modeEntraBetaNote:
+        "Beta: matching op groep/gebruiker-toegangslijsten is nieuw. Controleer of inloggen werkt voor een testgebruiker voordat je andere inlogopties verwijdert.",
       modeHybrid: "Hybride (lokaal + Entra ID)",
       modeHybridHint:
         "Sta zowel Microsoft-login als het lokale wachtwoord toe.",
+      modeHybridBetaNote:
+        "Beta: combineert de bèta-functies van Lokale gebruikers en Entra ID hierboven - lees beide notities voordat je dit inschakelt.",
       comingSoon: "Binnenkort beschikbaar",
       sessionTimeoutLabel: "Sessietime-out (minuten)",
       sessionTimeoutHint:
@@ -476,12 +519,13 @@ export default {
       saving: "Bezig met opslaan...",
       saveSuccess: "Authenticatie-instellingen opgeslagen.",
       saveFailed: "Kon authenticatie-instellingen niet opslaan.",
+      loadFailed: "Kon authenticatie-instellingen niet laden.",
       recoveryKeyLabel: "Herstelsleutel",
       recoveryKeyConfigured: "Geconfigureerd",
       recoveryKeyMissing: "Niet geconfigureerd",
       recoveryKeyHeading: "Herstelsleutel",
       recoveryKeyDescription:
-        "Een herstelsleutel reset het lokale wachtwoord als dat ooit kwijtraakt. Een nieuwe sleutel genereren maakt de vorige direct ongeldig - er werkt er maar één tegelijk.",
+        "Een herstelsleutel reset het lokale beheerderswachtwoord als dat ooit kwijtraakt. Een nieuwe sleutel genereren maakt de vorige direct ongeldig - er werkt er maar één tegelijk. Dit geldt alleen voor het enkele lokale beheerdersaccount - een Local Users-account of Entra ID-aanmelding kan hiermee niet gereset worden.",
       recoveryKeyGenerate: "Nieuwe herstelsleutel genereren",
       recoveryKeyGenerating: "Bezig met genereren...",
       recoveryKeyConfirm:
@@ -494,8 +538,14 @@ export default {
       entraEncryptionKeyMissing:
         "AUTH_ENCRYPTION_KEY staat niet ingesteld op de server, dus het client secret kan nog niet worden opgeslagen. Stel deze in in het .env-bestand van de backend en herstart de server.",
       entraTenantIdLabel: "Tenant ID",
+      entraTenantIdHint:
+        "Te vinden in het Entra admin center op de Overview-pagina van de app-registratie - ook wel de Directory (tenant) ID genoemd.",
       entraClientIdLabel: "Client ID",
+      entraClientIdHint:
+        "Te vinden op dezelfde Overview-pagina als de Tenant ID - ook wel de Application (client) ID genoemd.",
       entraClientSecretLabel: "Client Secret",
+      entraClientSecretHint:
+        "Aangemaakt op de 'Certificates & secrets'-pagina van de app-registratie. Alleen de waarde die op het moment van aanmaken getoond wordt werkt hier - deze is later niet meer op te halen.",
       entraClientSecretPlaceholder: "Voer het client secret in",
       entraClientSecretKeepPlaceholder:
         "Leeg laten om het huidige secret te behouden",
@@ -517,6 +567,7 @@ export default {
     },
     localUsers: {
       heading: "Lokale gebruikers",
+      loadFailed: "Kon de lijst met lokale gebruikers niet laden.",
       description:
         "Beheer de accounts die met een gebruikersnaam en wachtwoord kunnen inloggen. Entra ID-accounts verschijnen hier ook zodra ze minstens één keer zijn ingelogd.",
       addUser: "Gebruiker toevoegen",
@@ -559,6 +610,75 @@ export default {
       actionFailed: "Die actie is mislukt.",
       empty: "Nog geen gebruikers.",
     },
+    backup: {
+      heading: "Data Beheer & Backup",
+      manualBackupHeading: "Handmatige backup",
+      downloadDatabase: "Download Database",
+      downloadDatabaseTitle: "Download database backup",
+      restoreDatabase: "Restore Database",
+      restoreDatabaseTitle: "Restore Backup",
+      backupCenter: "Database Backup Center",
+      lastBackup: "Laatste backup:",
+      never: "Nog nooit",
+      backupAvailable: "Database backup beschikbaar",
+      noBackupYet: "Nog geen database backup",
+      backupStatusLabel: "Status",
+      backupScheduleHeading: "Planning automatische backups",
+      backupIntervalLabel: "Backup-interval (uren)",
+      backupIntervalHint: "Hoe vaak de Toolbox automatisch een backup maakt.",
+      maxBackupsLabel: "Maximaal aantal backups",
+      maxBackupsHint:
+        "Hoeveel automatische backups bewaard blijven voordat de oudste wordt verwijderd.",
+      backupScheduleHint:
+        "Hoe vaak de Toolbox automatisch een backup maakt, en hoeveel er bewaard blijven voordat de oudste wordt verwijderd.",
+      scheduleSaveSuccess: "Backupplanning opgeslagen.",
+      scheduleSaveFailed: "Kon de backupplanning niet opslaan.",
+      loadBackupsFailed: "Kon de lijst met back-ups niet laden.",
+      loadScheduleFailed: "Kon de backupplanning niet laden.",
+      backupLastRun: "Laatste run",
+      backupLastRunNever: "Nog nooit",
+      backupNextRun: "Volgende run",
+      backupRunStatus: {
+        created: "backup gemaakt",
+        skipped: "overgeslagen, database was bezig",
+        failed: "mislukt",
+      },
+      automaticBackups: "Automatische Backups",
+      backupsStored: "{count} / {max} backups opgeslagen",
+      moreActions: "Meer acties voor {name}",
+      noAutomaticBackups: "Nog geen automatische backups gevonden",
+      downloadFailed: "Database download mislukt.",
+      restoreConfirm: "De huidige database wordt overschreven. Doorgaan?",
+      restoreConfirmStep2:
+        "Weet je het zeker? Dit kan niet ongedaan worden gemaakt - alle gegevens die zijn toegevoegd sinds het geüploade bestand is gemaakt, gaan verloren.",
+      restoreSuccess:
+        "Database succesvol hersteld. De Toolbox wordt opnieuw geladen.",
+      restoreFailed: "Restore mislukt.",
+      backupTypeAutomatic: "Automatisch",
+      backupTypeSafety: "Veiligheidsback-up",
+      backupTypeUnknown: "Onbekend",
+      downloadBackup: "Download",
+      downloadBackupTitle: "Download deze back-up",
+      downloadBackupFailed: "Download van back-up mislukt.",
+      restoreBackup: "Restore",
+      restoreBackupTitle: "Herstel deze back-up",
+      restoreBackupInProgress: "Bezig met herstellen...",
+      restoreBackupStep1Warning:
+        "Het herstellen van een back-up overschrijft de huidige database. Alle wijzigingen sinds deze back-up gaan verloren.",
+      restoreBackupPrepareFailed:
+        "Kon geen veiligheidsback-up maken. Restore geannuleerd.",
+      safetyBackupDownloadFailed:
+        "Kon de veiligheidsback-up niet downloaden, maar deze is wel op de server aangemaakt voordat er verder werd gegaan.",
+      restoreBackupStep3Confirm:
+        "Er is eerst een veiligheidsback-up gemaakt van de huidige situatie ({file}). Weet je zeker dat je de geselecteerde back-up wilt terugzetten?",
+      restoreCancelFailed:
+        "Kon de restore-sessie niet annuleren op de server - deze verloopt vanzelf binnenkort.",
+      restoreBackupSuccessDetail:
+        "Back-up succesvol teruggezet: {file} ({time}).",
+      restoreBackupFailedRolledBack:
+        "Restore mislukt. De database is automatisch hersteld naar de vorige staat.",
+      refreshPrompt: "Pagina nu verversen om de wijzigingen te zien?",
+    },
     branding: {
       heading: "Huisstijl",
       description:
@@ -591,7 +711,11 @@ export default {
       imageRemoveFailed: "Kon de afbeelding niet verwijderen.",
       themeHeading: "Themakleuren",
       primaryColorLabel: "Primaire kleur",
+      primaryColorHint:
+        "Gebruikt voor knoppen, links en de inlogknop door de hele app heen.",
       accentColorLabel: "Accentkleur",
+      accentColorHint:
+        "Spaarzaam gebruikt, voor de markeringsbalk van het actieve sidebar-item.",
       invalidColor: "Kleuren moeten een hexwaarde zijn zoals #3b82f6.",
       loginHeading: "Inlogscherm",
       loginTitleLabel: "Inlogtitel",
@@ -616,6 +740,7 @@ export default {
       previewLogin: "Inlogscherm",
     },
     about: {
+      loadFailed: "Kon systeeminformatie niet laden.",
       applicationInfo: "Applicatie-informatie",
       version: "Versie",
       release: "Release",
@@ -680,11 +805,13 @@ export default {
       retentionSystemLabel: "Bewaartermijn systeemlogs (dagen)",
       retentionErrorLabel: "Bewaartermijn foutlogs (dagen)",
       retentionSecurityLabel: "Bewaartermijn audit-/beveiligingslogs (dagen)",
+      retentionDaysHint: "0 dagen bewaart regels voor altijd.",
       retentionMaxRowsLabel: "Maximaal aantal opgeslagen logboekregels",
       retentionHint:
-        "0 dagen bewaart regels voor altijd. Het maximumaantal regels wordt altijd gehandhaafd, ongeacht de leeftijd, als veiligheidsgrens.",
+        "Wordt altijd gehandhaafd, ongeacht de leeftijd, als veiligheidsgrens los van de bewaartermijnen hierboven.",
       retentionSaved: "Bewaarinstellingen opgeslagen.",
       retentionSaveFailed: "Kon bewaarinstellingen niet opslaan.",
+      retentionLoadFailed: "Kon bewaarinstellingen niet laden.",
       purgeHeading: "Logs wissen",
       purgeScopeLabel: "Bereik",
       purgeScope: {
@@ -1090,6 +1217,7 @@ export default {
     configureStepFinishing: "Afronden...",
     configureFailed: "Setup kon niet worden afgerond.",
     tryAgain: "Opnieuw proberen",
+    startOver: "Opnieuw beginnen",
 
     doneTitle: "Toolbox is klaar",
     doneDescription: "Setup succesvol afgerond.",

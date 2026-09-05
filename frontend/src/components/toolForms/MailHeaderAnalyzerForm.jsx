@@ -284,7 +284,7 @@ export default function MailHeaderAnalyzerForm({ compactMode = false }) {
                 style={{ margin: 0, paddingLeft: "18px", color: "var(--text)" }}
               >
                 {result.summary.attentionPoints.map((point, index) => (
-                  <li key={index}>{point}</li>
+                  <li key={`${index}-${point}`}>{point}</li>
                 ))}
               </ul>
             </div>
@@ -383,7 +383,7 @@ export default function MailHeaderAnalyzerForm({ compactMode = false }) {
               <div style={{ display: "grid", gap: "10px" }}>
                 {result.authentication.results.map((entry, index) => (
                   <div
-                    key={index}
+                    key={`${index}-${entry.host}`}
                     style={{
                       border: "1px solid var(--border)",
                       borderRadius: "8px",

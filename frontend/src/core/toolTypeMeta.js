@@ -1,64 +1,29 @@
 import { toolRegistry } from "./toolRegistry";
-import { FALLBACK_COLOR } from "./tokens";
+import {
+  getMarketplaceCategoryColor,
+  getMarketplaceCategoryLabel,
+} from "./marketplaceCategories";
 
-const colorMap = {
-  dns: "var(--primary)",
-  dnsPropagationViewer: "var(--primary)",
-  reverseDns: "var(--primary)",
-
-  mail: "#0f766e",
-  dmarcBuilder: "#0f766e",
-  dmarcReportParser: "#0f766e",
-  spfBuilder: "#0f766e",
-  spfFlatten: "#0f766e",
-  smtpConfigurationBuilder: "#0f766e",
-
-  ipLookup: "#0ea5e9",
-  mac: "#0891b2",
-  portCheck: "#0ea5e9",
-  subnetCalculator: "#0ea5e9",
-  whoisLookup: "#0ea5e9",
-
-  reputationCheck: "#9333ea",
-  sslChecker: "#9333ea",
-  certificateToolkit: "#9333ea",
-
-  secretGenerator: "#16a34a",
-  password: "#16a34a",
-  sidConverter: "#16a34a",
-
-  bsodAnalyzer: "#dc2626",
-  link: "#f59e0b",
-};
-
-function hashString(value) {
-  let hash = 0;
-
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
-  }
-
-  return hash;
+// The badge next to each tool's title is meant to show the tool's *kind*
+// at a glance - a small, shared vocabulary a user can learn to recognize
+// across the whole catalog. Previously it rendered toolRegistry[toolType]'s
+// own `label`, which is unique per tool (e.g. "BSOD Analyzer"), so the badge
+// just repeated the title next to it instead of adding new information.
+// Every registry entry already carries a `marketplaceCategory` - the same
+// small category set Tools Center's filter bar uses - so this delegates to
+// that shared vocabulary instead of inventing a second one.
+function getCategory(toolType) {
+  return toolRegistry[toolType]?.marketplaceCategory;
 }
 
-const HUE_STEP = 47;
-const SATURATION = "65%";
-const LIGHTNESS = "50%";
-
 export function getToolTypeLabel(toolType) {
-  return toolRegistry[toolType]?.label || "Tool";
+  const category = getCategory(toolType);
+
+  return category ? getMarketplaceCategoryLabel(category) : "Tool";
 }
 
 export function getToolTypeColor(toolType) {
-  if (colorMap[toolType]) {
-    return colorMap[toolType];
-  }
+  const category = getCategory(toolType);
 
-  if (!toolType) {
-    return FALLBACK_COLOR;
-  }
-
-  const hue = (hashString(toolType) * HUE_STEP) % 360;
-
-  return `hsl(${hue}, ${SATURATION}, ${LIGHTNESS})`;
+  return category ? getMarketplaceCategoryColor(category) : "#475569";
 }

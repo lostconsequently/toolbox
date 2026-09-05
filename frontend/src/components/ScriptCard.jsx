@@ -1,8 +1,8 @@
-import { FileCode, Lock, Star } from "lucide-react";
+import { FileCode, Lock, Pencil, Star, Trash2 } from "lucide-react";
 
 import Card from "./shared/Card";
 import Badge from "./shared/Badge";
-import ActionButton from "./toolForms/shared/ActionButton";
+import CardMenu from "./shared/CardMenu";
 import { useAdmin } from "../context/AdminContext";
 import { useSettings } from "../context/SettingsContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -36,7 +36,16 @@ export default function ScriptCard({
   return (
     <Card
       hoverShadow
+      role="button"
       tabIndex={0}
+      onClick={() => onView(script)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onView(script);
+        }
+      }}
+      aria-label={t("scriptLibrary.viewCardAria", { name: script.title })}
       style={{
         padding: compactMode ? "12px" : "18px",
         marginBottom: "12px",
@@ -45,6 +54,7 @@ export default function ScriptCard({
         alignItems: "center",
         gap: compactMode ? "12px" : "20px",
         flexWrap: "wrap",
+        cursor: "pointer",
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -62,7 +72,10 @@ export default function ScriptCard({
           <h3 style={{ margin: 0, color: "var(--text)" }}>{script.title}</h3>
 
           <button
-            onClick={() => onToggleFavorite(script)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleFavorite(script);
+            }}
             title={t("scriptLibrary.favorite")}
             aria-label={t("scriptLibrary.favorite")}
             className="a11y-focus-ring"
@@ -144,40 +157,24 @@ export default function ScriptCard({
         )}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          flexShrink: 0,
-          flexWrap: "wrap",
-        }}
-      >
-        <ActionButton onClick={() => onView(script)} compactMode={compactMode}>
-          {t("scriptLibrary.view")}
-        </ActionButton>
-
-        {isAdmin && (
-          <ActionButton
-            title={t("scriptLibrary.edit")}
-            onClick={() => onEdit(script)}
-            variant="edit"
-            compactMode={compactMode}
-          >
-            {t("scriptLibrary.edit")}
-          </ActionButton>
-        )}
-
-        {isAdmin && (
-          <ActionButton
-            title={t("scriptLibrary.delete")}
-            onClick={() => onDelete(script.id)}
-            variant="danger"
-            compactMode={compactMode}
-          >
-            {t("scriptLibrary.delete")}
-          </ActionButton>
-        )}
-      </div>
+      {isAdmin && (
+        <CardMenu
+          ariaLabel={t("scriptLibrary.moreActions", { name: script.title })}
+          items={[
+            {
+              label: t("scriptLibrary.edit"),
+              icon: <Pencil size={14} />,
+              onClick: () => onEdit(script),
+            },
+            {
+              label: t("scriptLibrary.delete"),
+              icon: <Trash2 size={14} />,
+              onClick: () => onDelete(script.id),
+              danger: true,
+            },
+          ]}
+        />
+      )}
     </Card>
   );
 }

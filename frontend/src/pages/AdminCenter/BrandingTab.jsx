@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
-import { Image, Palette, RotateCcw, Upload, X } from "lucide-react";
+import {
+  Image,
+  LogIn,
+  Palette,
+  RotateCcw,
+  Type,
+  Upload,
+  X,
+} from "lucide-react";
 
 import ActionButton from "../../components/toolForms/shared/ActionButton";
 import ColorField from "../../components/toolForms/shared/ColorField";
 import FormField from "../../components/toolForms/shared/FormField";
+import Card from "../../components/shared/Card";
+import InfoTooltip from "../../components/shared/InfoTooltip";
 import { useAdmin } from "../../context/AdminContext";
 import { useBranding } from "../../context/BrandingContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSettings } from "../../context/SettingsContext";
 import { api, toBackendUrl } from "../../services/api";
+import { cardPadding, stackedFieldMaxWidth } from "../../core/tokens";
+import "../../styles/hoverCard.css";
 
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp";
-
-const DEFAULT_RESET_COLOR = "#2563EB";
 
 export default function BrandingTab({ confirm, setNotice }) {
   const { isAdmin } = useAdmin();
@@ -164,8 +174,8 @@ export default function BrandingTab({ confirm, setNotice }) {
       setAppName(config.appName || "");
       setTagline(config.tagline || "");
       setCompanyName(config.companyName || "");
-      setPrimaryColor(config.primaryColor || DEFAULT_RESET_COLOR);
-      setAccentColor(config.accentColor || DEFAULT_RESET_COLOR);
+      setPrimaryColor(config.primaryColor || "");
+      setAccentColor(config.accentColor || "");
       setLoginTitle(config.loginTitle || "");
       setLoginSubtitle(config.loginSubtitle || "");
       setLoginWelcomeMessage(config.loginWelcomeMessage || "");
@@ -191,6 +201,11 @@ export default function BrandingTab({ confirm, setNotice }) {
     }
   };
 
+  const cardStyle = {
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
+  };
+
   return (
     <div
       style={{
@@ -200,170 +215,211 @@ export default function BrandingTab({ confirm, setNotice }) {
         alignItems: "start",
       }}
     >
-      <div
-        style={{
-          background: "var(--card)",
-          padding: compactMode ? "14px" : "20px",
-          borderRadius: "12px",
-          border: "1px solid var(--border)",
-          opacity: isAdmin ? 1 : 0.6,
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>{t("adminCenter.branding.heading")}</h2>
-
-        <p style={{ color: "var(--subtle)" }}>
-          {t("adminCenter.branding.description")}
-        </p>
-
-        <h3 style={{ marginBottom: "12px" }}>
-          {t("adminCenter.branding.identityHeading")}
-        </h3>
-
-        <div style={{ display: "grid", gap: "14px", marginBottom: "24px" }}>
-          <FormField
-            label={t("adminCenter.branding.appNameLabel")}
-            value={appName}
-            onChange={setAppName}
-            placeholder="Toolbox"
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-
-          <FormField
-            label={t("adminCenter.branding.taglineLabel")}
-            value={tagline}
-            onChange={setTagline}
-            placeholder={t("adminCenter.branding.taglinePlaceholder")}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-
-          <FormField
-            label={t("adminCenter.branding.companyNameLabel")}
-            value={companyName}
-            onChange={setCompanyName}
-            placeholder={t("adminCenter.branding.companyNamePlaceholder")}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-        </div>
-
-        <h3 style={{ marginBottom: "12px" }}>
-          {t("adminCenter.branding.logoHeading")}
-        </h3>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "14px",
-            marginBottom: "24px",
-          }}
-        >
-          <ImageUploadField
-            label={t("adminCenter.branding.logoLabel")}
-            hint={t("adminCenter.branding.logoHint")}
-            currentUrl={logoUrl}
-            shape="square"
-            accept={IMAGE_ACCEPT}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-            onUpload={(file) => handleImageUpload("logo", file)}
-            onRemove={() => handleImageRemove("logo")}
-          />
-
-          <ImageUploadField
-            label={t("adminCenter.branding.faviconLabel")}
-            hint={t("adminCenter.branding.faviconHint")}
-            currentUrl={faviconUrl}
-            shape="square"
-            accept={IMAGE_ACCEPT}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-            onUpload={(file) => handleImageUpload("favicon", file)}
-            onRemove={() => handleImageRemove("favicon")}
-          />
-
-          <ImageUploadField
-            label={t("adminCenter.branding.loginBackgroundLabel")}
-            hint={t("adminCenter.branding.loginBackgroundHint")}
-            currentUrl={loginBackgroundUrl}
-            shape="wide"
-            accept={IMAGE_ACCEPT}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-            onUpload={(file) => handleImageUpload("login-background", file)}
-            onRemove={() => handleImageRemove("login-background")}
-          />
-        </div>
-
-        <h3 style={{ marginBottom: "12px" }}>
-          {t("adminCenter.branding.themeHeading")}
-        </h3>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "14px",
-            marginBottom: "24px",
-          }}
-        >
-          <ColorField
-            label={t("adminCenter.branding.primaryColorLabel")}
-            value={primaryColor}
-            onChange={setPrimaryColor}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-
-          <ColorField
-            label={t("adminCenter.branding.accentColorLabel")}
-            value={accentColor}
-            onChange={setAccentColor}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-        </div>
-
-        {colorError && (
+      <div style={{ opacity: isAdmin ? 1 : 0.6 }}>
+        <Card style={cardStyle} hoverLift={false}>
           <div
             style={{
-              fontSize: "12px",
-              color: "var(--status-error)",
-              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
             }}
           >
-            {t("adminCenter.branding.invalidColor")}
+            <Type size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.branding.identityHeading")}
+            </h3>
           </div>
-        )}
 
-        <h3 style={{ marginBottom: "12px" }}>
-          {t("adminCenter.branding.loginHeading")}
-        </h3>
+          <div style={{ display: "grid", gap: "14px" }}>
+            <FormField
+              label={t("adminCenter.branding.appNameLabel")}
+              value={appName}
+              onChange={setAppName}
+              placeholder="Toolbox"
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
 
-        <div style={{ display: "grid", gap: "14px", marginBottom: "24px" }}>
-          <FormField
-            label={t("adminCenter.branding.loginTitleLabel")}
-            value={loginTitle}
-            onChange={setLoginTitle}
-            placeholder="Toolbox"
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
+            <FormField
+              label={t("adminCenter.branding.taglineLabel")}
+              value={tagline}
+              onChange={setTagline}
+              placeholder={t("adminCenter.branding.taglinePlaceholder")}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
 
-          <FormField
-            label={t("adminCenter.branding.loginSubtitleLabel")}
-            value={loginSubtitle}
-            onChange={setLoginSubtitle}
-            placeholder={t("login.subtitle")}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
+            <FormField
+              label={t("adminCenter.branding.companyNameLabel")}
+              value={companyName}
+              onChange={setCompanyName}
+              placeholder={t("adminCenter.branding.companyNamePlaceholder")}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
+          </div>
+        </Card>
 
-          <div>
+        <Card style={cardStyle} hoverLift={false}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <Image size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.branding.logoHeading")}
+            </h3>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "14px",
+            }}
+          >
+            <ImageUploadField
+              label={t("adminCenter.branding.logoLabel")}
+              hint={t("adminCenter.branding.logoHint")}
+              currentUrl={logoUrl}
+              shape="square"
+              accept={IMAGE_ACCEPT}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              onUpload={(file) => handleImageUpload("logo", file)}
+              onRemove={() => handleImageRemove("logo")}
+            />
+
+            <ImageUploadField
+              label={t("adminCenter.branding.faviconLabel")}
+              hint={t("adminCenter.branding.faviconHint")}
+              currentUrl={faviconUrl}
+              shape="square"
+              accept={IMAGE_ACCEPT}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              onUpload={(file) => handleImageUpload("favicon", file)}
+              onRemove={() => handleImageRemove("favicon")}
+            />
+
+            <ImageUploadField
+              label={t("adminCenter.branding.loginBackgroundLabel")}
+              hint={t("adminCenter.branding.loginBackgroundHint")}
+              currentUrl={loginBackgroundUrl}
+              shape="wide"
+              accept={IMAGE_ACCEPT}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              onUpload={(file) => handleImageUpload("login-background", file)}
+              onRemove={() => handleImageRemove("login-background")}
+            />
+          </div>
+        </Card>
+
+        <Card style={cardStyle} hoverLift={false}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <Palette size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.branding.themeHeading")}
+            </h3>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: "14px",
+              maxWidth: stackedFieldMaxWidth,
+            }}
+          >
+            <ColorField
+              label={t("adminCenter.branding.primaryColorLabel")}
+              hint={t("adminCenter.branding.primaryColorHint")}
+              value={primaryColor}
+              onChange={setPrimaryColor}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              className="hover-card"
+            />
+
+            <ColorField
+              label={t("adminCenter.branding.accentColorLabel")}
+              hint={t("adminCenter.branding.accentColorHint")}
+              value={accentColor}
+              onChange={setAccentColor}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              className="hover-card"
+            />
+          </div>
+
+          {colorError && (
+            <div
+              style={{
+                fontSize: "12px",
+                color: "var(--status-error)",
+                marginTop: "12px",
+              }}
+            >
+              {t("adminCenter.branding.invalidColor")}
+            </div>
+          )}
+        </Card>
+
+        <Card style={cardStyle} hoverLift={false}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <LogIn size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.branding.loginHeading")}
+            </h3>
+          </div>
+
+          <div style={{ display: "grid", gap: "14px" }}>
+            <FormField
+              label={t("adminCenter.branding.loginTitleLabel")}
+              value={loginTitle}
+              onChange={setLoginTitle}
+              placeholder="Toolbox"
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
+
+            <FormField
+              label={t("adminCenter.branding.loginSubtitleLabel")}
+              value={loginSubtitle}
+              onChange={setLoginSubtitle}
+              placeholder={t("login.subtitle")}
+              disabled={!isAdmin}
+              compactMode={compactMode}
+              wrapperClassName="hover-card"
+            />
+
             <FormField
               label={t("adminCenter.branding.loginWelcomeMessageLabel")}
+              hint={t("adminCenter.branding.loginWelcomeMessageHint")}
               value={loginWelcomeMessage}
               onChange={setLoginWelcomeMessage}
               placeholder={t(
@@ -373,19 +429,10 @@ export default function BrandingTab({ confirm, setNotice }) {
               textarea
               rows={2}
               compactMode={compactMode}
+              wrapperClassName="hover-card"
             />
-
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--subtle)",
-                marginTop: "6px",
-              }}
-            >
-              {t("adminCenter.branding.loginWelcomeMessageHint")}
-            </div>
           </div>
-        </div>
+        </Card>
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <ActionButton
@@ -509,7 +556,9 @@ function ImageUploadField({
     <div>
       <label
         style={{
-          display: "block",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
           marginBottom: "6px",
           color: "var(--subtle)",
           fontSize: "12px",
@@ -517,6 +566,7 @@ function ImageUploadField({
         }}
       >
         {label}
+        {hint && <InfoTooltip text={hint} />}
       </label>
 
       <div
@@ -549,16 +599,6 @@ function ImageUploadField({
         )}
       </div>
 
-      <div
-        style={{
-          fontSize: "11px",
-          color: "var(--subtle)",
-          marginBottom: "8px",
-        }}
-      >
-        {hint}
-      </div>
-
       {selectedFile ? (
         <div style={{ display: "flex", gap: "6px" }}>
           <ActionButton
@@ -566,6 +606,7 @@ function ImageUploadField({
             compactMode
             disabled={uploading}
             onClick={confirmUpload}
+            className="hover-card"
           >
             {uploading
               ? t("adminCenter.branding.uploading")
@@ -577,6 +618,7 @@ function ImageUploadField({
             compactMode
             disabled={uploading}
             onClick={cancelSelection}
+            className="hover-card"
           >
             {t("common.cancel")}
           </ActionButton>
@@ -584,7 +626,7 @@ function ImageUploadField({
       ) : (
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           <label
-            className="a11y-focus-ring"
+            className="a11y-focus-ring hover-card"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -620,6 +662,7 @@ function ImageUploadField({
               icon={<X size={13} />}
               disabled={disabled || removing}
               onClick={handleRemove}
+              className="hover-card"
             >
               {removing
                 ? t("adminCenter.branding.removing")
@@ -634,6 +677,7 @@ function ImageUploadField({
 
 function BrandingPreview({
   appName,
+  tagline,
   loginTitle,
   loginSubtitle,
   loginWelcomeMessage,
@@ -696,7 +740,16 @@ function BrandingPreview({
             alt=""
             style={{ width: "24px", height: "24px", objectFit: "contain" }}
           />
-          <strong style={{ fontSize: "14px" }}>{appName}</strong>
+
+          <div>
+            <strong style={{ fontSize: "14px" }}>{appName}</strong>
+
+            {tagline && (
+              <div style={{ fontSize: "11px", color: "var(--subtle)" }}>
+                {tagline}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -52,7 +52,7 @@ export default class ErrorBoundary extends Component {
             justifyItems: "center",
           }}
         >
-          <AlertTriangle size={32} color="#f59e0b" />
+          <AlertTriangle size={32} color="var(--status-warning)" />
 
           <h2
             style={{
@@ -76,7 +76,10 @@ export default class ErrorBoundary extends Component {
             onClick={this.handleReload}
             style={{
               marginTop: "8px",
-              background: "#2563eb",
+              // Falls back to the original hardcoded blue - this boundary
+              // sits above App.jsx, so if App itself failed to mount, the
+              // div that sets --primary from branding may not exist either.
+              background: "var(--primary, #2563eb)",
               border: "none",
               borderRadius: "8px",
               padding: "10px 16px",

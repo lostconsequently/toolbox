@@ -5,6 +5,7 @@ import ActionButton from "../../../components/toolForms/shared/ActionButton";
 import FormField from "../../../components/toolForms/shared/FormField";
 import { useLanguage } from "../../../context/LanguageContext";
 import { api } from "../../../services/api";
+import "../../../styles/hoverCard.css";
 
 const PURGE_SCOPES = ["all", "system", "error", "security"];
 
@@ -41,11 +42,21 @@ export default function LogRetentionSettings({
         setSecurityRetentionDays(config.securityRetentionDays);
         setMaxTotalRows(config.maxTotalRows);
       })
-      .catch(console.error);
+      .catch((err) => {
+        if (ignore) return;
+
+        console.error(err);
+
+        setNotice({
+          status: "error",
+          message: err.message || t("adminCenter.logging.retentionLoadFailed"),
+        });
+      });
 
     return () => {
       ignore = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   const saveConfig = async () => {
@@ -125,6 +136,7 @@ export default function LogRetentionSettings({
       >
         <FormField
           label={t("adminCenter.logging.retentionSystemLabel")}
+          hint={t("adminCenter.logging.retentionDaysHint")}
           type="number"
           min={0}
           max={3650}
@@ -132,10 +144,12 @@ export default function LogRetentionSettings({
           onChange={setSystemRetentionDays}
           disabled={!isAdmin}
           compactMode={compactMode}
+          wrapperClassName="hover-card"
         />
 
         <FormField
           label={t("adminCenter.logging.retentionErrorLabel")}
+          hint={t("adminCenter.logging.retentionDaysHint")}
           type="number"
           min={0}
           max={3650}
@@ -143,10 +157,12 @@ export default function LogRetentionSettings({
           onChange={setErrorRetentionDays}
           disabled={!isAdmin}
           compactMode={compactMode}
+          wrapperClassName="hover-card"
         />
 
         <FormField
           label={t("adminCenter.logging.retentionSecurityLabel")}
+          hint={t("adminCenter.logging.retentionDaysHint")}
           type="number"
           min={0}
           max={3650}
@@ -154,10 +170,12 @@ export default function LogRetentionSettings({
           onChange={setSecurityRetentionDays}
           disabled={!isAdmin}
           compactMode={compactMode}
+          wrapperClassName="hover-card"
         />
 
         <FormField
           label={t("adminCenter.logging.retentionMaxRowsLabel")}
+          hint={t("adminCenter.logging.retentionHint")}
           type="number"
           min={1000}
           max={1000000}
@@ -165,17 +183,8 @@ export default function LogRetentionSettings({
           onChange={setMaxTotalRows}
           disabled={!isAdmin}
           compactMode={compactMode}
+          wrapperClassName="hover-card"
         />
-      </div>
-
-      <div
-        style={{
-          fontSize: "12px",
-          color: "var(--subtle)",
-          marginBottom: "14px",
-        }}
-      >
-        {t("adminCenter.logging.retentionHint")}
       </div>
 
       <ActionButton
@@ -183,6 +192,7 @@ export default function LogRetentionSettings({
         variant="primary"
         compactMode={compactMode}
         onClick={saveConfig}
+        className="hover-card"
       >
         {saving ? t("common.saving") : t("common.save")}
       </ActionButton>
@@ -206,7 +216,7 @@ export default function LogRetentionSettings({
             flexWrap: "wrap",
           }}
         >
-          <div style={{ minWidth: "180px" }}>
+          <div className="hover-card" style={{ minWidth: "180px" }}>
             <label
               style={{
                 display: "block",
@@ -235,11 +245,16 @@ export default function LogRetentionSettings({
                 height: compactMode ? "34px" : "38px",
               }}
             >
-              {PURGE_SCOPES.map((scope) => (
-                <option key={scope} value={scope}>
-                  {t(`adminCenter.logging.purgeScope.${scope}`)}
-                </option>
-              ))}
+              {PURGE_SCOPES.map((scope) => ({
+                scope,
+                label: t(`adminCenter.logging.purgeScope.${scope}`),
+              }))
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map(({ scope, label }) => (
+                  <option key={scope} value={scope}>
+                    {label}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -249,6 +264,7 @@ export default function LogRetentionSettings({
             compactMode={compactMode}
             icon={<Trash2 size={13} />}
             onClick={runPurge}
+            className="hover-card"
           >
             {purging
               ? t("adminCenter.logging.purging")

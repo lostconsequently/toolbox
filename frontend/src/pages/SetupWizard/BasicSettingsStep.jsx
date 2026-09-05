@@ -7,50 +7,8 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
 import { languages } from "../../i18n";
 import { themes } from "../../core/themes";
-
-function getUtcOffsetLabel(zone) {
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: zone,
-      timeZoneName: "longOffset",
-    }).formatToParts(new Date());
-
-    const offset = parts.find((part) => part.type === "timeZoneName")?.value;
-
-    return offset ? offset.replace("GMT", "UTC") : "UTC";
-  } catch {
-    return "";
-  }
-}
-
-function getTimezoneOptions() {
-  const guess = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-
-  if (typeof Intl.supportedValuesOf === "function") {
-    try {
-      const zones = Intl.supportedValuesOf("timeZone");
-
-      return { zones, guess };
-    } catch {
-      // Fall through to the curated fallback below.
-    }
-  }
-
-  return {
-    zones: [
-      "UTC",
-      "Europe/Amsterdam",
-      "Europe/London",
-      "Europe/Berlin",
-      "Europe/Istanbul",
-      "America/New_York",
-      "America/Los_Angeles",
-      "Asia/Tokyo",
-      "Australia/Sydney",
-    ],
-    guess,
-  };
-}
+import { getGroupedTimezoneOptions } from "../../utils/timezones";
+import { formatClockTime } from "../../utils/timeSettings";
 
 export default function BasicSettingsStep({
   wizardState,
@@ -61,24 +19,19 @@ export default function BasicSettingsStep({
   const { t } = useLanguage();
   const { updateTheme } = useTheme();
 
-  const { zones, guess } = useMemo(getTimezoneOptions, []);
-
-  const timezoneOptions = useMemo(
-    () =>
-      zones
-        .map((zone) => ({
-          value: zone,
-          label: `${zone} (${getUtcOffsetLabel(zone)})`,
-          offset: getUtcOffsetLabel(zone),
-        }))
-        .sort((a, b) => a.value.localeCompare(b.value)),
-    [zones],
+  // Recomputed once wizardState.timezone has a value so that zone stays the
+  // representative shown for its UTC offset, instead of the dropdown
+  // silently swapping to a different city at the same offset.
+  const { options: timezoneOptions, guess } = useMemo(
+    () => getGroupedTimezoneOptions({ preferredZones: [wizardState.timezone] }),
+    [wizardState.timezone],
   );
 
-  const currentTimezone =
-    wizardState.timezone && zones.includes(wizardState.timezone)
-      ? wizardState.timezone
-      : guess;
+  const currentTimezone = timezoneOptions.some(
+    (option) => option.value === wizardState.timezone,
+  )
+    ? wizardState.timezone
+    : guess;
 
   // The displayed value can differ from wizardState.timezone until the user
   // actually touches the dropdown (it falls back to the detected zone) -
@@ -101,17 +54,14 @@ export default function BasicSettingsStep({
 
   const previewTime = useMemo(() => {
     try {
-      return new Intl.DateTimeFormat(undefined, {
-        timeZone: currentTimezone,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      }).format(now);
+      return formatClockTime(now, {
+        timezone: currentTimezone,
+        timeFormat: wizardState.timeFormat,
+      });
     } catch {
       return "";
     }
-  }, [currentTimezone, now]);
+  }, [currentTimezone, wizardState.timeFormat, now]);
 
   return (
     <div>
@@ -154,6 +104,16 @@ export default function BasicSettingsStep({
             </p>
           )}
         </div>
+
+        <SelectField
+          label={t("adminCenter.general.timeFormatLabel")}
+          value={wizardState.timeFormat}
+          onChange={(value) => patchState({ timeFormat: value })}
+          options={[
+            { value: "24h", label: t("adminCenter.general.timeFormat24h") },
+            { value: "12h", label: t("adminCenter.general.timeFormat12h") },
+          ]}
+        />
 
         <SelectField
           label={t("setupWizard.themeLabel")}

@@ -56,7 +56,7 @@ export default class WindowErrorBoundary extends Component {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <AlertTriangle size={18} color="#f59e0b" />
+          <AlertTriangle size={18} color="var(--status-warning)" />
 
           <strong style={{ color: "var(--text)" }}>
             {title

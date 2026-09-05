@@ -1,20 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  Clock,
-  Database,
-  Download,
-  RotateCcw,
-  ShieldCheck,
-} from "lucide-react";
+import { useEffect, useReducer, useRef } from "react";
+import { Clock, Database, Download, RotateCcw } from "lucide-react";
 
 import ActionButton from "../../components/toolForms/shared/ActionButton";
 import FormField from "../../components/toolForms/shared/FormField";
 import StatusBadge from "../../components/toolForms/shared/StatusBadge";
-import Badge from "../../components/shared/Badge";
+import Card from "../../components/shared/Card";
+import CardMenu from "../../components/shared/CardMenu";
 import { useAdmin } from "../../context/AdminContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useSettings } from "../../context/SettingsContext";
+import { useTimeSettings } from "../../context/TimeSettingsContext";
 import { api } from "../../services/api";
+import { cardPadding, stackedFieldMaxWidth } from "../../core/tokens";
 
 function triggerBlobDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -30,102 +27,82 @@ function triggerBlobDownload(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-function SectionCard({ icon, title, compactMode, children }) {
-  return (
-    <div
-      style={{
-        padding: compactMode ? "12px" : "16px",
-        marginBottom: "16px",
-        background: "var(--surface)",
-        borderRadius: "10px",
-        border: "1px solid var(--border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          marginBottom: "14px",
-        }}
-      >
-        {icon}
-        <h3 style={{ margin: 0 }}>{title}</h3>
-      </div>
+// The form previously tracked backups/interval/maxBackups/savingConfig/last
+// run info/restoring/downloading as ~10 independent useState calls for one
+// interdependent form (loading the schedule and loading the backup list feed
+// into the same UI). A reducer keeps each state transition explicit and
+// makes it impossible for one setter to update while a sibling field is
+// left stale.
+const initialState = {
+  backups: [],
+  restoringBackup: null,
+  downloadingBackup: null,
+  intervalHours: 24,
+  maxBackups: 10,
+  savingConfig: false,
+  lastRunAt: null,
+  lastRunStatus: null,
+  nextRunAt: null,
+};
 
-      {children}
-    </div>
-  );
-}
-
-function StatTile({ icon, value, label, valueColor }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "10px 12px",
-        background: "var(--card)",
-        border: "1px solid var(--border)",
-        borderRadius: "8px",
-      }}
-    >
-      {icon}
-
-      <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontWeight: "700",
-            fontSize: "13px",
-            color: valueColor || "var(--text)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {value}
-        </div>
-
-        <div style={{ fontSize: "11px", color: "var(--subtle)" }}>{label}</div>
-      </div>
-    </div>
-  );
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_BACKUPS":
+      return { ...state, backups: action.backups };
+    case "SET_SCHEDULE_CONFIG":
+      return {
+        ...state,
+        intervalHours: action.intervalHours,
+        maxBackups: action.maxBackups,
+        lastRunAt: action.lastRunAt,
+        lastRunStatus: action.lastRunStatus,
+        nextRunAt: action.nextRunAt,
+      };
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    default:
+      return state;
+  }
 }
 
 export default function BackupTab({ confirm, setNotice }) {
   const { isAdmin } = useAdmin();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { settings } = useSettings();
+  const { formatDateTime } = useTimeSettings();
 
   const compactMode = settings?.compactMode || false;
 
-  const [backups, setBackups] = useState([]);
-  const [restoringBackup, setRestoringBackup] = useState(null);
-  const [downloadingBackup, setDownloadingBackup] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const {
+    backups,
+    restoringBackup,
+    downloadingBackup,
+    intervalHours,
+    maxBackups,
+    savingConfig,
+    lastRunAt,
+    lastRunStatus,
+    nextRunAt,
+  } = state;
 
-  const [intervalHours, setIntervalHours] = useState(24);
-  const [maxBackups, setMaxBackups] = useState(10);
-  const [savingConfig, setSavingConfig] = useState(false);
+  const setField = (field, value) => dispatch({ type: "SET_FIELD", field, value });
 
   const databaseInputRef = useRef(null);
 
-  const lastExport = localStorage.getItem("toolbox_last_export");
+  const refreshBackups = async () => {
+    try {
+      const result = await api.getBackups();
 
-  const lastAutomaticBackup = backups.length > 0 ? backups[0].created : null;
+      dispatch({ type: "SET_BACKUPS", backups: result.backups || [] });
+    } catch (err) {
+      console.error(err);
 
-  const latestBackupDate = [lastExport, lastAutomaticBackup]
-    .filter(Boolean)
-    .map((date) => new Date(date))
-    .sort((a, b) => b - a)[0];
-
-  const refreshBackups = () => {
-    return api
-      .getBackups()
-      .then((result) => {
-        setBackups(result.backups || []);
-      })
-      .catch(console.error);
+      setNotice({
+        status: "error",
+        message: err.message || t("adminCenter.backup.loadBackupsFailed"),
+      });
+    }
   };
 
   useEffect(() => {
@@ -135,32 +112,57 @@ export default function BackupTab({ confirm, setNotice }) {
 
     let ignore = false;
 
-    api
-      .getBackups()
-      .then((result) => {
-        if (!ignore) {
-          setBackups(result.backups || []);
-        }
-      })
-      .catch(console.error);
+    (async () => {
+      try {
+        const result = await api.getBackups();
 
-    api
-      .getBackupConfig()
-      .then((config) => {
+        if (!ignore) {
+          dispatch({ type: "SET_BACKUPS", backups: result.backups || [] });
+        }
+      } catch (err) {
         if (ignore) return;
 
-        setIntervalHours(config.intervalHours);
-        setMaxBackups(config.maxBackups);
-      })
-      .catch(console.error);
+        console.error(err);
+
+        setNotice({
+          status: "error",
+          message: err.message || t("adminCenter.backup.loadBackupsFailed"),
+        });
+      }
+
+      try {
+        const config = await api.getBackupConfig();
+
+        if (!ignore) {
+          dispatch({
+            type: "SET_SCHEDULE_CONFIG",
+            intervalHours: config.intervalHours,
+            maxBackups: config.maxBackups,
+            lastRunAt: config.lastRunAt,
+            lastRunStatus: config.lastRunStatus,
+            nextRunAt: config.nextRunAt,
+          });
+        }
+      } catch (err) {
+        if (ignore) return;
+
+        console.error(err);
+
+        setNotice({
+          status: "error",
+          message: err.message || t("adminCenter.backup.loadScheduleFailed"),
+        });
+      }
+    })();
 
     return () => {
       ignore = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   const saveBackupConfig = async () => {
-    setSavingConfig(true);
+    setField("savingConfig", true);
     setNotice(null);
 
     try {
@@ -169,22 +171,28 @@ export default function BackupTab({ confirm, setNotice }) {
         maxBackups: Number(maxBackups),
       });
 
-      setIntervalHours(updated.intervalHours);
-      setMaxBackups(updated.maxBackups);
+      dispatch({
+        type: "SET_SCHEDULE_CONFIG",
+        intervalHours: updated.intervalHours,
+        maxBackups: updated.maxBackups,
+        lastRunAt: updated.lastRunAt,
+        lastRunStatus: updated.lastRunStatus,
+        nextRunAt: updated.nextRunAt,
+      });
 
       setNotice({
         status: "success",
-        message: t("settings.backupSettingsSaveSuccess"),
+        message: t("adminCenter.backup.scheduleSaveSuccess"),
       });
     } catch (err) {
       console.error(err);
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.backupSettingsSaveFailed"),
+        message: err.message || t("adminCenter.backup.scheduleSaveFailed"),
       });
     } finally {
-      setSavingConfig(false);
+      setField("savingConfig", false);
     }
   };
 
@@ -196,16 +204,29 @@ export default function BackupTab({ confirm, setNotice }) {
         blob,
         `toolbox-${new Date().toISOString().split("T")[0]}.db`,
       );
-
-      localStorage.setItem("toolbox_last_export", new Date().toISOString());
     } catch (err) {
       console.error("Database download failed:", err);
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.downloadFailed"),
+        message: err.message || t("adminCenter.backup.downloadFailed"),
       });
     }
+  };
+
+  // Warns immediately on click, before the file picker even opens - matching
+  // the kebab menu's restore flow, which warns first and only then acts.
+  // Previously this button opened the file picker straight away and only
+  // warned after a file was already chosen, so the two restore paths felt
+  // inconsistent.
+  const startRestoreDatabase = async () => {
+    const confirmed = await confirm(t("adminCenter.backup.restoreConfirm"), {
+      danger: true,
+    });
+
+    if (!confirmed) return;
+
+    databaseInputRef.current.click();
   };
 
   const restoreDatabase = async (event) => {
@@ -213,18 +234,10 @@ export default function BackupTab({ confirm, setNotice }) {
 
     if (!file) return;
 
-    const confirmedStep1 = await confirm(t("settings.restoreConfirm"), {
-      danger: true,
-    });
-
-    if (!confirmedStep1) {
-      event.target.value = "";
-      return;
-    }
-
-    const confirmedStep2 = await confirm(t("settings.restoreConfirmStep2"), {
-      danger: true,
-    });
+    const confirmedStep2 = await confirm(
+      t("adminCenter.backup.restoreConfirmStep2"),
+      { danger: true },
+    );
 
     if (!confirmedStep2) {
       event.target.value = "";
@@ -235,13 +248,16 @@ export default function BackupTab({ confirm, setNotice }) {
       const result = await api.restoreDatabase(file);
 
       if (result.success) {
-        setNotice({ status: "success", message: t("settings.restoreSuccess") });
+        setNotice({
+          status: "success",
+          message: t("adminCenter.backup.restoreSuccess"),
+        });
 
         window.location.reload();
       } else {
         setNotice({
           status: "error",
-          message: result.error || t("settings.restoreFailed"),
+          message: result.error || t("adminCenter.backup.restoreFailed"),
         });
       }
     } catch (err) {
@@ -249,7 +265,7 @@ export default function BackupTab({ confirm, setNotice }) {
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.restoreFailed"),
+        message: err.message || t("adminCenter.backup.restoreFailed"),
       });
     }
 
@@ -257,7 +273,7 @@ export default function BackupTab({ confirm, setNotice }) {
   };
 
   const downloadBackupFile = async (backup) => {
-    setDownloadingBackup(backup.name);
+    setField("downloadingBackup", backup.name);
 
     try {
       const blob = await api.downloadBackupFile(backup.name);
@@ -268,10 +284,10 @@ export default function BackupTab({ confirm, setNotice }) {
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.downloadBackupFailed"),
+        message: err.message || t("adminCenter.backup.downloadBackupFailed"),
       });
     } finally {
-      setDownloadingBackup(null);
+      setField("downloadingBackup", null);
     }
   };
 
@@ -279,7 +295,7 @@ export default function BackupTab({ confirm, setNotice }) {
     setNotice(null);
 
     const confirmedStep1 = await confirm(
-      t("settings.restoreBackupStep1Warning"),
+      t("adminCenter.backup.restoreBackupStep1Warning"),
       { danger: true },
     );
 
@@ -287,7 +303,7 @@ export default function BackupTab({ confirm, setNotice }) {
       return;
     }
 
-    setRestoringBackup(backup.name);
+    setField("restoringBackup", backup.name);
 
     let prepared;
 
@@ -298,10 +314,10 @@ export default function BackupTab({ confirm, setNotice }) {
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.restoreBackupPrepareFailed"),
+        message: err.message || t("adminCenter.backup.restoreBackupPrepareFailed"),
       });
 
-      setRestoringBackup(null);
+      setField("restoringBackup", null);
 
       return;
     }
@@ -314,10 +330,15 @@ export default function BackupTab({ confirm, setNotice }) {
       triggerBlobDownload(safetyBlob, prepared.safetyBackupFile);
     } catch (err) {
       console.error("Could not download the safety backup:", err);
+
+      setNotice({
+        status: "error",
+        message: t("adminCenter.backup.safetyBackupDownloadFailed"),
+      });
     }
 
     const confirmedRestore = await confirm(
-      t("settings.restoreBackupStep3Confirm", {
+      t("adminCenter.backup.restoreBackupStep3Confirm", {
         file: prepared.safetyBackupFile,
       }),
       { danger: true },
@@ -328,9 +349,14 @@ export default function BackupTab({ confirm, setNotice }) {
         await api.cancelRestoreFromBackup(prepared.restoreToken);
       } catch (err) {
         console.error("Could not cancel the restore session:", err);
+
+        setNotice({
+          status: "error",
+          message: t("adminCenter.backup.restoreCancelFailed"),
+        });
       }
 
-      setRestoringBackup(null);
+      setField("restoringBackup", null);
       await refreshBackups();
 
       return;
@@ -339,12 +365,10 @@ export default function BackupTab({ confirm, setNotice }) {
     try {
       const result = await api.commitRestoreFromBackup(prepared.restoreToken);
 
-      const restoredAtLabel = new Date(result.restoredAt).toLocaleString(
-        language === "nl" ? "nl-NL" : "en-US",
-      );
+      const restoredAtLabel = formatDateTime(new Date(result.restoredAt));
 
-      const shouldReload = await confirm(t("settings.refreshPrompt"), {
-        title: t("settings.restoreBackupSuccessDetail", {
+      const shouldReload = await confirm(t("adminCenter.backup.refreshPrompt"), {
+        title: t("adminCenter.backup.restoreBackupSuccessDetail", {
           file: result.restoredBackup,
           time: restoredAtLabel,
         }),
@@ -360,195 +384,100 @@ export default function BackupTab({ confirm, setNotice }) {
 
       setNotice({
         status: "error",
-        message: err.message || t("settings.restoreBackupFailedRolledBack"),
+        message:
+          err.message || t("adminCenter.backup.restoreBackupFailedRolledBack"),
       });
 
       await refreshBackups();
     } finally {
-      setRestoringBackup(null);
+      setField("restoringBackup", null);
     }
   };
 
+  const cardStyle = {
+    padding: compactMode ? cardPadding.compact : cardPadding.normal,
+    marginBottom: compactMode ? cardPadding.compact : cardPadding.normal,
+  };
+
   return (
-    <div
-      style={{
-        background: "var(--card)",
-        padding: compactMode ? "14px" : "20px",
-        borderRadius: "12px",
-        marginBottom: compactMode ? "14px" : "20px",
-        border: "1px solid var(--border)",
-        opacity: isAdmin ? 1 : 0.6,
-      }}
-    >
-      <h2 style={{ marginTop: 0 }}>{t("settings.dataManagementHeading")}</h2>
-
-      <p style={{ color: "var(--subtle)" }}>
-        {t("settings.dataManagementDescription")}
-      </p>
-
-      <SectionCard
-        icon={<Download size={16} />}
-        title={t("settings.manualBackupHeading")}
-        compactMode={compactMode}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          <ActionButton
-            disabled={!isAdmin}
-            title={
-              !isAdmin
-                ? t("common.adminRequired")
-                : t("settings.downloadDatabaseTitle")
-            }
-            onClick={() => {
-              if (!isAdmin) return;
-
-              downloadDatabase();
-            }}
-            variant="primary"
-            compactMode={compactMode}
-          >
-            {t("settings.downloadDatabase")}
-          </ActionButton>
-
-          <ActionButton
-            disabled={!isAdmin}
-            title={
-              !isAdmin
-                ? t("common.adminRequired")
-                : t("settings.restoreDatabaseTitle")
-            }
-            onClick={() => {
-              if (!isAdmin) return;
-
-              databaseInputRef.current.click();
-            }}
-            variant="success"
-            compactMode={compactMode}
-          >
-            {t("settings.restoreDatabase")}
-          </ActionButton>
-        </div>
-
-        <input
-          ref={databaseInputRef}
-          type="file"
-          accept=".db"
-          onChange={restoreDatabase}
-          style={{ display: "none" }}
-        />
-      </SectionCard>
-
-      <SectionCard
-        icon={<Database size={16} />}
-        title={t("settings.backupCenter")}
-        compactMode={compactMode}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "10px",
-            marginBottom: "18px",
-          }}
-        >
-          <StatTile
-            icon={<Download size={16} color="var(--subtle)" />}
-            value={
-              latestBackupDate
-                ? latestBackupDate.toLocaleString(
-                    language === "nl" ? "nl-NL" : "en-US",
-                  )
-                : t("settings.never")
-            }
-            label={t("settings.lastBackup")}
-          />
-
-          <StatTile
-            icon={
-              <ShieldCheck
-                size={16}
-                color={
-                  lastExport ? "var(--status-success)" : "var(--status-warning)"
-                }
-              />
-            }
-            value={
-              latestBackupDate
-                ? t("settings.backupAvailable")
-                : t("settings.noBackupYet")
-            }
-            label={t("settings.backupStatusLabel")}
-            valueColor={
-              lastExport ? "var(--status-success)" : "var(--status-warning)"
-            }
-          />
-        </div>
-
+    <div style={{ opacity: isAdmin ? 1 : 0.6 }}>
+      <Card style={cardStyle} hoverLift={false}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            marginBottom: "10px",
+            marginBottom: "12px",
           }}
         >
-          <Clock size={15} color="var(--subtle)" />
+          <Clock size={16} />
+          <h3 style={{ margin: 0 }}>
+            {t("adminCenter.backup.backupScheduleHeading")}
+          </h3>
+        </div>
 
-          <h4 style={{ margin: 0 }}>{t("settings.backupScheduleHeading")}</h4>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "14px",
+            maxWidth: stackedFieldMaxWidth,
+            marginBottom: "14px",
+          }}
+        >
+          <FormField
+            label={t("adminCenter.backup.backupIntervalLabel")}
+            hint={t("adminCenter.backup.backupIntervalHint")}
+            type="number"
+            min={1}
+            max={168}
+            value={intervalHours}
+            onChange={(value) => setField("intervalHours", value)}
+            disabled={!isAdmin}
+            compactMode={compactMode}
+            className="no-spinner"
+            wrapperClassName="hover-card"
+          />
 
-          <Badge
-            label={t("common.beta")}
-            color="var(--status-warning)"
-            variant="soft"
-            compactMode
+          <FormField
+            label={t("adminCenter.backup.maxBackupsLabel")}
+            hint={t("adminCenter.backup.maxBackupsHint")}
+            type="number"
+            min={1}
+            max={100}
+            value={maxBackups}
+            onChange={(value) => setField("maxBackups", value)}
+            disabled={!isAdmin}
+            compactMode={compactMode}
+            className="no-spinner"
+            wrapperClassName="hover-card"
           />
         </div>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "14px",
-            marginBottom: "10px",
-          }}
-        >
-          <FormField
-            label={t("settings.backupIntervalLabel")}
-            type="number"
-            min={1}
-            max={168}
-            value={intervalHours}
-            onChange={setIntervalHours}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-
-          <FormField
-            label={t("settings.maxBackupsLabel")}
-            type="number"
-            min={1}
-            max={100}
-            value={maxBackups}
-            onChange={setMaxBackups}
-            disabled={!isAdmin}
-            compactMode={compactMode}
-          />
-        </div>
-
-        <div
-          style={{
+            gap: "4px",
             fontSize: "12px",
             color: "var(--subtle)",
-            marginBottom: "12px",
+            marginBottom: "14px",
           }}
         >
-          {t("settings.backupScheduleHint")}
+          <div>
+            {t("adminCenter.backup.backupLastRun")}:{" "}
+            <strong style={{ color: "var(--text)" }}>
+              {lastRunAt
+                ? `${formatDateTime(new Date(lastRunAt))} (${t(`adminCenter.backup.backupRunStatus.${lastRunStatus}`)})`
+                : t("adminCenter.backup.backupLastRunNever")}
+            </strong>
+          </div>
+
+          <div>
+            {t("adminCenter.backup.backupNextRun")}:{" "}
+            <strong style={{ color: "var(--text)" }}>
+              {nextRunAt ? formatDateTime(new Date(nextRunAt)) : "—"}
+            </strong>
+          </div>
         </div>
 
         <ActionButton
@@ -556,150 +485,201 @@ export default function BackupTab({ confirm, setNotice }) {
           variant="primary"
           compactMode={compactMode}
           onClick={saveBackupConfig}
+          className="hover-card"
         >
           {savingConfig ? t("common.saving") : t("common.save")}
         </ActionButton>
+      </Card>
+
+      <Card style={cardStyle} hoverLift={false}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "10px",
+            flexWrap: "wrap",
+            marginBottom: "12px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <Database size={16} />
+            <h3 style={{ margin: 0 }}>
+              {t("adminCenter.backup.automaticBackups")}
+            </h3>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <ActionButton
+              disabled={!isAdmin}
+              title={
+                !isAdmin
+                  ? t("common.adminRequired")
+                  : t("adminCenter.backup.downloadDatabaseTitle")
+              }
+              onClick={() => {
+                if (!isAdmin) return;
+
+                downloadDatabase();
+              }}
+              variant="secondary"
+              compactMode
+              className="hover-card"
+            >
+              {t("adminCenter.backup.downloadDatabase")}
+            </ActionButton>
+
+            <ActionButton
+              disabled={!isAdmin}
+              title={
+                !isAdmin
+                  ? t("common.adminRequired")
+                  : t("adminCenter.backup.restoreDatabaseTitle")
+              }
+              onClick={() => {
+                if (!isAdmin) return;
+
+                startRestoreDatabase();
+              }}
+              variant="secondaryDanger"
+              compactMode
+              className="hover-card"
+            >
+              {t("adminCenter.backup.restoreDatabase")}
+            </ActionButton>
+
+            <input
+              ref={databaseInputRef}
+              type="file"
+              accept=".db"
+              onChange={restoreDatabase}
+              style={{ display: "none" }}
+            />
+          </div>
+        </div>
 
         <div
           style={{
-            marginTop: "20px",
-            paddingTop: "16px",
-            borderTop: "1px solid var(--border)",
+            marginBottom: "16px",
+            color: "var(--subtle)",
           }}
         >
-          <h4 style={{ margin: "0 0 12px 0" }}>
-            {t("settings.automaticBackups")}
-          </h4>
+          {t("adminCenter.backup.backupsStored", {
+            count: backups.filter((backup) => backup.type === "automatic")
+              .length,
+            max: maxBackups,
+          })}
+        </div>
 
-          <div
-            style={{
-              marginBottom: "16px",
-              color: "var(--subtle)",
-            }}
-          >
-            {t("settings.backupsStored", {
-              count: backups.filter((backup) => backup.type === "automatic")
-                .length,
-              max: maxBackups,
-            })}
+        {backups.length === 0 ? (
+          <div style={{ color: "var(--subtle)" }}>
+            {t("adminCenter.backup.noAutomaticBackups")}
           </div>
+        ) : (
+          backups.map((backup) => {
+            const busy =
+              downloadingBackup === backup.name || Boolean(restoringBackup);
 
-          {backups.length === 0 ? (
-            <div style={{ color: "var(--subtle)" }}>
-              {t("settings.noAutomaticBackups")}
-            </div>
-          ) : (
-            backups.map((backup) => (
-              <div
+            return (
+              <Card
                 key={backup.name}
                 style={{
+                  padding: compactMode ? "10px 12px" : "12px 14px",
+                  marginBottom: "8px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
                   gap: "12px",
-                  padding: "10px 0",
-                  borderBottom: "1px solid var(--border)",
                   flexWrap: "wrap",
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <span
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <Database size={16} color="var(--subtle)" />
+
+                  <div>
+                    <div
                       style={{
-                        fontFamily: "var(--mono, monospace)",
-                        fontSize: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                       }}
                     >
-                      {backup.name}
-                    </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--mono, monospace)",
+                          fontSize: "12px",
+                          color: "var(--text)",
+                        }}
+                      >
+                        {backup.name}
+                      </span>
 
-                    <StatusBadge
-                      label={
-                        backup.type === "automatic"
-                          ? t("settings.backupTypeAutomatic")
-                          : backup.type === "restore-safety"
-                            ? t("settings.backupTypeSafety")
-                            : t("settings.backupTypeUnknown")
-                      }
-                      status={
-                        backup.type === "automatic" ? "neutral" : "warning"
-                      }
-                      compactMode
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--subtle)",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {(backup.size / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--subtle)",
-                      textAlign: "right",
-                    }}
-                  >
-                    {new Date(backup.created).toLocaleString(
-                      language === "nl" ? "nl-NL" : "en-US",
-                    )}
-                  </div>
-
-                  {isAdmin && (
-                    <>
-                      <ActionButton
-                        icon={<Download size={13} />}
-                        variant="secondary"
-                        compactMode
-                        disabled={
-                          downloadingBackup === backup.name ||
-                          Boolean(restoringBackup)
+                      <StatusBadge
+                        label={
+                          backup.type === "automatic"
+                            ? t("adminCenter.backup.backupTypeAutomatic")
+                            : backup.type === "restore-safety"
+                              ? t("adminCenter.backup.backupTypeSafety")
+                              : t("adminCenter.backup.backupTypeUnknown")
                         }
-                        title={t("settings.downloadBackupTitle")}
-                        onClick={() => downloadBackupFile(backup)}
-                      >
-                        {t("settings.downloadBackup")}
-                      </ActionButton>
-
-                      <ActionButton
-                        icon={<RotateCcw size={13} />}
-                        variant="danger"
+                        status={
+                          backup.type === "automatic" ? "neutral" : "warning"
+                        }
                         compactMode
-                        disabled={Boolean(restoringBackup)}
-                        title={t("settings.restoreBackupTitle")}
-                        onClick={() => restoreFromBackup(backup)}
-                      >
-                        {restoringBackup === backup.name
-                          ? t("settings.restoreBackupInProgress")
-                          : t("settings.restoreBackup")}
-                      </ActionButton>
-                    </>
-                  )}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--subtle)",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {(backup.size / 1024 / 1024).toFixed(2)} MB ·{" "}
+                      {formatDateTime(new Date(backup.created))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-      </SectionCard>
+
+                {isAdmin && (
+                  <CardMenu
+                    ariaLabel={t("adminCenter.backup.moreActions", {
+                      name: backup.name,
+                    })}
+                    disabled={busy}
+                    items={[
+                      {
+                        label:
+                          downloadingBackup === backup.name
+                            ? t("common.saving")
+                            : t("adminCenter.backup.downloadBackup"),
+                        icon: <Download size={14} />,
+                        onClick: () => downloadBackupFile(backup),
+                      },
+                      {
+                        label:
+                          restoringBackup === backup.name
+                            ? t("adminCenter.backup.restoreBackupInProgress")
+                            : t("adminCenter.backup.restoreBackup"),
+                        icon: <RotateCcw size={14} />,
+                        onClick: () => restoreFromBackup(backup),
+                        danger: true,
+                      },
+                    ]}
+                  />
+                )}
+              </Card>
+            );
+          })
+        )}
+      </Card>
     </div>
   );
 }

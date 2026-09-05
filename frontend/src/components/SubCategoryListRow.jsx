@@ -1,8 +1,10 @@
 import { useSettings } from "../context/SettingsContext";
 import { useAdmin } from "../context/AdminContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import ActionButton from "./toolForms/shared/ActionButton";
 import Card from "./shared/Card";
+import { MOBILE_BREAKPOINT_QUERY } from "../core/tokens";
 import "../styles/hoverCard.css";
 
 export default function SubCategoryListRow({
@@ -16,6 +18,7 @@ export default function SubCategoryListRow({
   const { isAdmin } = useAdmin();
   const { t } = useLanguage();
   const compactMode = settings?.compactMode || false;
+  const isMobile = useMediaQuery(MOBILE_BREAKPOINT_QUERY);
 
   return (
     <Card
@@ -35,9 +38,11 @@ export default function SubCategoryListRow({
         padding: compactMode ? "8px 10px" : "10px 12px",
         marginBottom: compactMode ? "6px" : "8px",
         display: "grid",
-        gridTemplateColumns: "minmax(220px, 1.5fr) minmax(160px, 1fr) auto",
+        gridTemplateColumns: isMobile
+          ? "1fr"
+          : "minmax(220px, 1.5fr) minmax(160px, 1fr) auto",
         gap: compactMode ? "8px" : "12px",
-        alignItems: "center",
+        alignItems: isMobile ? "stretch" : "center",
         cursor: "pointer",
       }}
     >
