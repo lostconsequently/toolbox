@@ -2,11 +2,7 @@
 
 # Toolbox
 
-As someone working in IT support and Microsoft 365 administration, I wanted a single platform that brings together the tools I use most often. What began as a small collection of utilities quickly grew into a modern, self-hosted toolbox designed for service desks, system administrators, MSPs, and other IT professionals.
-
-The goal with this project is to create something that is genuinely useful: a platform that saves time, reduces complexity, and gives full control over their data without relying on dozens of separate services.
-
-I hope Toolbox can make your daily IT work just a little bit easier.
+Toolbox is a free, self-hosted, open-source platform combining network, security, mail, and identity tools (DNS lookup, SPF/DKIM/DMARC builder, SSL inspector, password generator, PowerShell script library) into one Docker-deployable app for IT support teams, sysadmins, and MSPs.
 
 ## Features
 
@@ -39,7 +35,7 @@ Toolbox is a personal project developed and maintained in my spare time. While t
 
 ## AI Disclaimer
 
-The tool is completely Built by Claude Code
+The tool is completely built by Claude Code
 
 ## License
 
