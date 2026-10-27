@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const router = express.Router();
@@ -7,7 +6,6 @@ const router = express.Router();
 const { validate, validationError } = require("../utils/validate");
 const { createRateLimiter } = require("../utils/rateLimiter");
 const { resolveDataPath, ensureDir } = require("../utils/dataPaths");
-const { getBrandingUploadsDir } = require("../utils/brandingUploads");
 const { detectImageType } = require("../utils/imageValidation");
 const { requireAdmin } = require("./auth");
 const { logWarning } = require("../services/logService");
@@ -16,6 +14,8 @@ const {
   setBrandingConfig,
   setBrandingFilePath,
   resetBrandingConfig,
+  saveBrandingFile,
+  deleteBrandingFile,
 } = require("../services/brandingService");
 
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
@@ -71,30 +71,6 @@ function validateHexColor(value, label) {
   return null;
 }
 
-function deleteUploadedFile(filename) {
-  if (!filename) return;
-
-  // filename is only ever one this app generated itself (see
-  // createUploadHandler below), never a client-supplied value, so this is
-  // defensive rather than load-bearing - path.basename() strips any
-  // separator just in case a stored value were ever malformed.
-  const filePath = path.join(getBrandingUploadsDir(), path.basename(filename));
-
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (err) {
-      logWarning({
-        category: "error",
-        eventType: "upload.cleanup_failed",
-        source: "BRANDING",
-        message: `Could not delete branding file: ${path.basename(filePath)}`,
-        error: err,
-      });
-    }
-  }
-}
-
 // Public - the login page (reachable before anyone is signed in) needs the
 // app name, colors and logo/background URLs to render at all. Same
 // reasoning as /api/auth/status being public.
@@ -148,9 +124,9 @@ router.post("/reset", requireAdmin, async (req, res, next) => {
   try {
     const existing = await getBrandingConfig();
 
-    deleteUploadedFile(existing.logoPath);
-    deleteUploadedFile(existing.faviconPath);
-    deleteUploadedFile(existing.loginBackgroundPath);
+    await deleteBrandingFile(existing.logoPath);
+    await deleteBrandingFile(existing.faviconPath);
+    await deleteBrandingFile(existing.loginBackgroundPath);
 
     const config = await resetBrandingConfig();
 
@@ -165,7 +141,7 @@ router.post("/reset", requireAdmin, async (req, res, next) => {
 // One multer instance per slot (each gets its own size cap) sharing the same
 // temp-dir-then-validate-then-move shape as backup.js's database restore:
 // land in temp, check real content via magic bytes (never trust the
-// client's filename/Content-Type), then copy into the branding uploads dir
+// client's filename/Content-Type), then store the bytes in the database
 // under a server-generated filename before removing whatever the slot
 // previously held.
 
@@ -253,9 +229,12 @@ function createUploadHandlers(slotName) {
       }
 
       const filename = `${slotName}-${Date.now()}.${detected.ext}`;
-      const destPath = path.join(getBrandingUploadsDir(), filename);
 
-      fs.copyFileSync(uploadedFile, destPath);
+      await saveBrandingFile(
+        filename,
+        detected.mime,
+        fs.readFileSync(uploadedFile),
+      );
 
       const existing = await getBrandingConfig();
       const previousFilename = existing[slot.configField];
@@ -265,7 +244,7 @@ function createUploadHandlers(slotName) {
       // Only remove the old file after the new one is safely written and
       // the DB points at it - if the copy or DB update above had thrown,
       // the previous file (and the config pointing at it) is untouched.
-      deleteUploadedFile(previousFilename);
+      await deleteBrandingFile(previousFilename);
 
       const updated = await getBrandingConfig();
 
@@ -287,7 +266,7 @@ function createRemoveHandler(slotName) {
     try {
       const existing = await getBrandingConfig();
 
-      deleteUploadedFile(existing[slot.configField]);
+      await deleteBrandingFile(existing[slot.configField]);
 
       await setBrandingFilePath(slot.column, null);
 

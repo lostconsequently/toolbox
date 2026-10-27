@@ -36,7 +36,7 @@ const sessionAuthRoutes = require("./routes/sessionAuth");
 const authConfigRoutes = require("./routes/authConfig");
 const entraAuthRoutes = require("./routes/entraAuth");
 const brandingRoutes = require("./routes/branding");
-const { getBrandingUploadsDir } = require("./utils/brandingUploads");
+const { getBrandingFile } = require("./services/brandingService");
 const setupRoutes = require("./routes/setup");
 const systemInfoRoutes = require("./routes/systemInfo");
 const usersRoutes = require("./routes/users");
@@ -216,16 +216,28 @@ if (hasFrontend) {
 // Filenames are always server-generated (never the client's original
 // filename), and a short cache lifetime keeps a replaced logo from being
 // stuck in a browser cache for long.
-app.use(
-  "/uploads/branding",
-  express.static(getBrandingUploadsDir(), { maxAge: "1h" }),
-);
+app.get("/uploads/branding/:filename", async (req, res) => {
+  try {
+    const file = await getBrandingFile(req.params.filename);
+
+    if (!file) {
+      return res.status(404).end();
+    }
+
+    res.setHeader("Content-Type", file.mimeType);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(file.data);
+  } catch {
+    res.status(503).end();
+  }
+});
 
 app.get("/api", (req, res) => {
   res.json({
     app: "Toolbox API",
     status: "running",
-    version: "0.9.7",
+    version: "0.9.8",
   });
 });
 

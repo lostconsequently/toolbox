@@ -189,9 +189,9 @@ CREATE TABLE IF NOT EXISTS recovery_keys (
 -- Single-row config table (id is always 1) for the Admin Center Branding
 -- tab. Every column is nullable and NULL means "use the built-in default" -
 -- resetting a field is just setting it back to NULL, no separate defaults
--- table needed. *_path columns hold a filename under
--- database/uploads/branding/ (served publicly at /uploads/branding/<file>,
--- see app.js) rather than the file content itself.
+-- table needed. *_path columns hold a filename that is a key into
+-- branding_files (served publicly at /uploads/branding/<file>, see app.js)
+-- rather than the file content itself.
 CREATE TABLE IF NOT EXISTS branding_config (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   app_name TEXT,
@@ -208,6 +208,16 @@ CREATE TABLE IF NOT EXISTS branding_config (
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO branding_config (id) VALUES (1);
+
+-- Uploaded logo/favicon/login-background image bytes. Stored in the database
+-- (keyed by the same filename the *_path columns hold) instead of on disk so
+-- every backup/restore - which only ever moves the .db file - carries them.
+CREATE TABLE IF NOT EXISTS branding_files (
+  filename TEXT PRIMARY KEY,
+  mime_type TEXT NOT NULL,
+  data BLOB NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Single-row config table (id is always 1) for the Admin Center Backup tab's
 -- automatic-backup schedule. Read by routes/backup.js on every scheduling

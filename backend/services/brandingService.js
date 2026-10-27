@@ -1,4 +1,7 @@
+const fs = require("fs");
+const path = require("path");
 const { get, run } = require("../database/db");
+const { getLegacyBrandingUploadsDir } = require("../utils/brandingUploads");
 
 // Every field nullable = NULL means "use the built-in default" (see
 // schema.sql's comment on branding_config). Kept as a flat object rather
@@ -96,6 +99,74 @@ async function setBrandingFilePath(column, filename) {
   );
 }
 
+const BRANDING_FILENAME_PATTERN = /^[a-z-]+-\d+\.(png|jpg|webp)$/;
+
+const MIME_BY_EXT = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  webp: "image/webp",
+};
+
+async function saveBrandingFile(filename, mimeType, data) {
+  await run(
+    "INSERT OR REPLACE INTO branding_files (filename, mime_type, data) VALUES (?, ?, ?)",
+    [filename, mimeType, data],
+  );
+}
+
+async function deleteBrandingFile(filename) {
+  if (!filename) return;
+
+  await run("DELETE FROM branding_files WHERE filename = ?", [filename]);
+
+  const legacyPath = path.join(
+    getLegacyBrandingUploadsDir(),
+    path.basename(filename),
+  );
+
+  if (fs.existsSync(legacyPath)) {
+    try {
+      fs.unlinkSync(legacyPath);
+    } catch {
+      // best effort - the database row is the source of truth now
+    }
+  }
+}
+
+// Falls back to the pre-database on-disk location so images uploaded before
+// this change (or referenced by a backup made before it) keep working; the
+// first hit copies the file into the database so it is part of every later
+// backup.
+async function importLegacyBrandingFile(filename) {
+  if (!BRANDING_FILENAME_PATTERN.test(filename)) return null;
+
+  const legacyPath = path.join(getLegacyBrandingUploadsDir(), filename);
+
+  if (!fs.existsSync(legacyPath)) return null;
+
+  const data = fs.readFileSync(legacyPath);
+  const mimeType = MIME_BY_EXT[path.extname(filename).slice(1)];
+
+  await saveBrandingFile(filename, mimeType, data);
+
+  return { mimeType, data };
+}
+
+async function getBrandingFile(filename) {
+  if (!BRANDING_FILENAME_PATTERN.test(filename)) return null;
+
+  const row = await get(
+    "SELECT mime_type, data FROM branding_files WHERE filename = ?",
+    [filename],
+  );
+
+  if (row) {
+    return { mimeType: row.mimeType, data: row.data };
+  }
+
+  return importLegacyBrandingFile(filename);
+}
+
 async function resetBrandingConfig() {
   await run(
     `UPDATE branding_config
@@ -122,4 +193,7 @@ module.exports = {
   setBrandingConfig,
   setBrandingFilePath,
   resetBrandingConfig,
+  saveBrandingFile,
+  deleteBrandingFile,
+  getBrandingFile,
 };

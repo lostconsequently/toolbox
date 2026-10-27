@@ -1,17 +1,14 @@
-const { resolveDataPath, ensureDir } = require("./dataPaths");
+const { resolveDataPath } = require("./dataPaths");
 
-// Shared between routes/branding.js (writes files here) and app.js (serves
-// them statically at /uploads/branding) so the directory is only resolved
-// in one place.
-function getBrandingUploadsDir() {
-  const dir = resolveDataPath(
+// Images used to be written to disk here before they moved into the
+// branding_files table. Only read from now, to import files uploaded by an
+// earlier version (see brandingService.importLegacyBrandingFile) - never
+// created, so a fresh install doesn't get an empty unused directory.
+function getLegacyBrandingUploadsDir() {
+  return resolveDataPath(
     process.env.BRANDING_UPLOADS_DIR,
     "database/uploads/branding",
   );
-
-  ensureDir(dir);
-
-  return dir;
 }
 
-module.exports = { getBrandingUploadsDir };
+module.exports = { getLegacyBrandingUploadsDir };
