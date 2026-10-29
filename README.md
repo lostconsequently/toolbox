@@ -35,7 +35,7 @@ Toolbox is a personal project developed and maintained in my spare time. While t
 
 ## AI Disclaimer
 
-The tool is completely built by Claude Code
+The code is completely built by Claude Code
 
 ## License
 
